@@ -1,0 +1,5 @@
+{
+  "name": "WanderPlan AI",
+  "description": "A smart travel itinerary generator that creates balanced, realistic trip plans based on your travel style and preferences using Gemini 3.",
+  "requestFramePermissions": []
+}
