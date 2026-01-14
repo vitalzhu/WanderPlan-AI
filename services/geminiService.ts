@@ -44,7 +44,7 @@ const generatePrompt = (prefs: TravelPreferences, language: Language): string =>
     5. Group Size Considerations: Since there are ${prefs.travelers} people, ensure activities and transport are appropriate for this group size.
     6. Weather & Clothing: 
        - USE GOOGLE SEARCH to find the historical weather average or forecast (if dates are close) for ${prefs.destination} during the trip dates (${prefs.startDate}).
-       - Provide SPECIFIC temperature ranges (e.g., 20-25°C) and clothing advice based on this search.
+       - Provide SPECIFIC temperature ranges (e.g., 20-25°C), general weather conditions (e.g., Sunny, Rainy, Cloudy), humidity levels (e.g., Low, High, 80%), and clothing advice based on this search.
     7. Transport Mode: The user plans to use ${prefs.transportation}. 
        - If "Self-driving", include parking tips and scenic driving routes where applicable.
        - If "Public Transit", ensure activities are accessible by metro/bus/train and mention key routes.
@@ -75,6 +75,8 @@ const generatePrompt = (prefs: TravelPreferences, language: Language): string =>
       },
       "weather_info": {
         "temperature_range": "string",
+        "weather_condition": "string",
+        "humidity": "string",
         "clothing_advice": "string"
       },
       "daily_plan": [
@@ -142,6 +144,8 @@ const processResponse = (response: any, prefs: TravelPreferences): TravelPlan =>
         },
         weather_info: {
             temperature_range: sanitizeString(rawResult.weather_info?.temperature_range),
+            weather_condition: sanitizeString(rawResult.weather_info?.weather_condition),
+            humidity: sanitizeString(rawResult.weather_info?.humidity),
             clothing_advice: sanitizeString(rawResult.weather_info?.clothing_advice)
         },
         daily_plan: (Array.isArray(rawResult.daily_plan) ? rawResult.daily_plan : []).map((day: any) => ({

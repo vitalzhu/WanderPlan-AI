@@ -1,3 +1,4 @@
+
 export type Language = 'zh' | 'en';
 
 export interface TravelPreferences {
@@ -36,6 +37,8 @@ export interface TripOverview {
 
 export interface WeatherInfo {
   temperature_range: string;
+  weather_condition: string;
+  humidity: string;
   clothing_advice: string;
 }
 

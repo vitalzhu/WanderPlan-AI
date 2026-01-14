@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TravelPlan, Language, DayPlan } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
@@ -66,6 +66,8 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
 
     content += `[${t.weatherTitle}]\n`;
     content += `${t.temperature}: ${plan.weather_info.temperature_range}\n`;
+    content += `${t.weatherCondition}: ${plan.weather_info.weather_condition}\n`;
+    content += `${t.humidity}: ${plan.weather_info.humidity}\n`;
     content += `${t.clothing}: ${plan.weather_info.clothing_advice}\n\n`;
     
     content += `==========================================\n`;
@@ -235,11 +237,33 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
             <Thermometer className="w-5 h-5 text-orange-500" /> {t.weatherTitle}
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
-                <div className="text-xs font-bold text-orange-700 uppercase mb-1">{t.temperature}</div>
-                <div className="text-lg font-semibold text-slate-800">{currentPlan.weather_info.temperature_range}</div>
+        <div className="flex flex-col gap-4">
+             {/* Weather Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5 mb-1 text-orange-700">
+                         <Thermometer className="w-3.5 h-3.5" />
+                         <div className="text-xs font-bold uppercase">{t.temperature}</div>
+                    </div>
+                    <div className="font-semibold text-slate-800">{currentPlan.weather_info.temperature_range}</div>
+                </div>
+                <div className="bg-sky-50 p-3 rounded-lg border border-sky-100 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5 mb-1 text-sky-700">
+                        <CloudSun className="w-3.5 h-3.5" />
+                        <div className="text-xs font-bold uppercase">{t.weatherCondition}</div>
+                    </div>
+                    <div className="font-semibold text-slate-800">{currentPlan.weather_info.weather_condition}</div>
+                </div>
+                 <div className="bg-teal-50 p-3 rounded-lg border border-teal-100 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5 mb-1 text-teal-700">
+                         <Droplets className="w-3.5 h-3.5" />
+                         <div className="text-xs font-bold uppercase">{t.humidity}</div>
+                    </div>
+                    <div className="font-semibold text-slate-800">{currentPlan.weather_info.humidity}</div>
+                </div>
             </div>
+
+            {/* Clothing Advice */}
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <div className="flex items-center gap-2 mb-2">
                     <Shirt className="w-4 h-4 text-blue-600" />
