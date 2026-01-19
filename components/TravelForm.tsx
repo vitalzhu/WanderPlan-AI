@@ -18,7 +18,17 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
   const [endDate, setEndDate] = useState(initialValues?.endDate || '');
   const [travelers, setTravelers] = useState<number>(initialValues?.travelers || 2);
   const [styles, setStyles] = useState<string[]>(initialValues?.styles || []);
-  const [avoid, setAvoid] = useState<string[]>(initialValues?.avoid || []);
+  
+  // Split avoid into "selected buttons" and "custom text"
+  const [avoid, setAvoid] = useState<string[]>(() => {
+    const knownIds = new Set(AVOID_OPTIONS.map(o => o.id));
+    return initialValues?.avoid?.filter(a => knownIds.has(a)) || [];
+  });
+  const [customAvoid, setCustomAvoid] = useState(() => {
+    const knownIds = new Set(AVOID_OPTIONS.map(o => o.id));
+    return initialValues?.avoid?.filter(a => !knownIds.has(a)).join(', ') || '';
+  });
+
   const [pace, setPace] = useState(initialValues?.pace || 'Balanced');
   const [transportation, setTransportation] = useState(initialValues?.transportation || 'Public Transit');
   const [companions, setCompanions] = useState(initialValues?.companions || 'Couple');
@@ -133,6 +143,14 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
         return;
     }
     
+    // Merge predefined avoid options with custom input
+    const finalAvoid = [...avoid];
+    if (customAvoid.trim()) {
+       // Split by common delimiters and clean up
+       const customs = customAvoid.split(/[,，、]/).map(s => s.trim()).filter(Boolean);
+       finalAvoid.push(...customs);
+    }
+
     setError('');
     onSubmit({
       destination,
@@ -142,7 +160,7 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
       startDate,
       endDate,
       styles,
-      avoid,
+      avoid: finalAvoid,
       pace,
       transportation,
       companions,
@@ -293,7 +311,7 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
           <Ban className="w-5 h-5 text-red-500" />
           {t.avoidLabel}
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           {AVOID_OPTIONS.map((opt) => {
              const Icon = opt.icon;
              const isSelected = avoid.includes(opt.id);
@@ -314,6 +332,16 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
               </button>
              );
           })}
+        </div>
+        <div>
+           <input
+              type="text"
+              value={customAvoid}
+              onChange={(e) => setCustomAvoid(e.target.value)}
+              placeholder={t.customAvoidPlaceholder}
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm"
+              disabled={isLoading}
+            />
         </div>
       </div>
 

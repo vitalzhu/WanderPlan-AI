@@ -8,7 +8,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     heroSubtitle: "",
     whereWhen: "目的地与时间",
     destination: "主要目的地",
-    destinationPlaceholder: "例如：日本 京都",
+    destinationPlaceholder: "例如：新疆 伊犁",
     waypointsLabel: "途径目的地 (选填)",
     addStop: "添加途径地",
     stopoverPlaceholder: "例如：大阪",
@@ -65,6 +65,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     editingDesc: "您可以直接修改下方的文本来添加、删除或重新安排活动。",
     backToSearch: "调整需求",
     returnToPlan: "返回当前行程",
+    customAvoidPlaceholder: "其他需要避开的事物（例如：海鲜、高海拔...）",
   },
   en: {
     appTitle: "WanderPlan AI",
@@ -130,5 +131,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     editingDesc: "You can modify text below to add, remove, or reorder activities.",
     backToSearch: "Edit Preferences",
     returnToPlan: "Back to Itinerary",
+    customAvoidPlaceholder: "Other things to avoid (e.g. Seafood, High altitude...)",
   }
 };
