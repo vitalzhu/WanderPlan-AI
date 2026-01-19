@@ -1,5 +1,5 @@
-
 export type Language = 'zh' | 'en';
+export type AIProvider = 'gemini' | 'deepseek';
 
 export interface TravelPreferences {
   destination: string;
@@ -15,6 +15,7 @@ export interface TravelPreferences {
   companions: string;
   budget: string;
   customKeywords: string;
+  provider?: AIProvider;
 }
 
 export interface DayPlan {
