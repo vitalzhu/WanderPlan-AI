@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TravelPreferences, Language, AIProvider } from '../types';
 import { TRAVEL_STYLES, PACE_OPTIONS, COMPANION_OPTIONS, BUDGET_OPTIONS, TRANSPORT_OPTIONS, AVOID_OPTIONS } from '../constants';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Calendar, Sparkles, AlertCircle, Clock, Plus, Trash2, Ban, Cpu, Search } from 'lucide-react';
+import { MapPin, Sparkles, AlertCircle, Plus, Trash2, Ban, Cpu, Search, Zap } from 'lucide-react';
 
 interface TravelFormProps {
   onSubmit: (prefs: TravelPreferences) => void;
@@ -38,6 +38,7 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
 
   const t = TRANSLATIONS[language];
 
+  // Set default dates
   useEffect(() => {
     if (initialValues) return;
     const tomorrow = new Date();
@@ -48,11 +49,36 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
     setEndDate(afterTomorrow.toISOString().split('T')[0]);
   }, [initialValues]);
 
+  // Sync end date
+  useEffect(() => {
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        setEndDate(startDate);
+    }
+  }, [startDate, endDate]);
+
+  const calculateDays = (start: string, end: string): number => {
+      const s = new Date(start);
+      const e = new Date(end);
+      const diffTime = e.getTime() - s.getTime();
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+  const addWaypoint = () => setWaypoints([...waypoints, '']);
+  const removeWaypoint = (i: number) => setWaypoints(waypoints.filter((_, idx) => idx !== i));
+  const updateWaypoint = (i: number, v: string) => {
+    const newWp = [...waypoints];
+    newWp[i] = v;
+    setWaypoints(newWp);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!destination.trim()) { setError(t.errorDest); return; }
     if (styles.length === 0) { setError(t.errorStyle); return; }
     
+    const days = calculateDays(startDate, endDate);
+    if (days < 1 || days > 14) { setError(t.errorDays); return; }
+
     const finalAvoid = [...avoid];
     if (customAvoid.trim()) {
        const customs = customAvoid.split(/[,，、]/).map(s => s.trim()).filter(Boolean);
@@ -63,7 +89,7 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
     onSubmit({
       destination,
       waypoints: waypoints.filter(w => w.trim() !== ''),
-      days: Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1,
+      days,
       travelers,
       startDate,
       endDate,
@@ -80,40 +106,8 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-8 p-1">
-      {/* Provider Selector */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <Cpu className="w-5 h-5 text-indigo-500" />
-          {t.aiModel}
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => setProvider('gemini')}
-            className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
-              provider === 'gemini' ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200' : 'bg-white border-slate-200 hover:border-slate-300'
-            }`}
-          >
-            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-              <Search className="w-5 h-5 text-indigo-600" />
-            </div>
-            <span className="text-sm font-bold">{t.geminiLabel}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setProvider('deepseek')}
-            className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
-              provider === 'deepseek' ? 'bg-slate-50 border-slate-800 ring-2 ring-slate-200' : 'bg-white border-slate-200 hover:border-slate-300'
-            }`}
-          >
-            <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center">
-              <Cpu className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-sm font-bold">{t.deepseekLabel}</span>
-          </button>
-        </div>
-      </div>
-
+      
+      {/* Destination */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
           <MapPin className="w-5 h-5 text-indigo-500" />
@@ -122,55 +116,182 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-slate-700 mb-1">{t.destination}</label>
-            <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder={t.destinationPlaceholder} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder={t.destinationPlaceholder} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none" disabled={isLoading} />
           </div>
+          
+          {/* Waypoints */}
+          <div className="md:col-span-2">
+             <label className="block text-sm font-medium text-slate-700 mb-1">{t.waypointsLabel}</label>
+             <div className="space-y-2 mb-2">
+                {waypoints.map((wp, i) => (
+                    <div key={i} className="flex gap-2">
+                        <input type="text" value={wp} onChange={e => updateWaypoint(i, e.target.value)} className="flex-1 px-4 py-2 rounded-lg border border-slate-300 outline-none focus:border-indigo-500" />
+                        <button type="button" onClick={() => removeWaypoint(i)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 className="w-5 h-5"/></button>
+                    </div>
+                ))}
+             </div>
+             <button type="button" onClick={addWaypoint} className="text-sm text-indigo-600 font-medium flex items-center gap-1"><Plus className="w-4 h-4"/> {t.addStop}</button>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">{t.startDate}</label>
-            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-slate-300 outline-none" disabled={isLoading} />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">{t.endDateLabel}</label>
-            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-slate-300 outline-none" disabled={isLoading} />
           </div>
         </div>
       </div>
 
+      {/* Style & Avoid */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-500" />
-          {t.vibe}
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><Sparkles className="w-5 h-5 text-amber-500" />{t.vibe}</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {TRAVEL_STYLES.map(style => (
-            <button key={style.id} type="button" onClick={() => setStyles(prev => prev.includes(style.id) ? prev.filter(s => s !== style.id) : [...prev, style.id])} className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-all ${styles.includes(style.id) ? 'bg-indigo-50 border-indigo-500 text-indigo-700 font-medium' : 'bg-white border-slate-200'}`}>
-              <style.icon className="w-4 h-4" />
-              <span className="text-sm">{style.label[language]}</span>
+          {TRAVEL_STYLES.map(s => (
+            <button key={s.id} type="button" onClick={() => setStyles(prev => prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id])} className={`flex items-center gap-2 px-4 py-3 rounded-lg border ${styles.includes(s.id) ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-slate-200'}`}>
+              <s.icon className="w-4 h-4"/> <span className="text-sm">{s.label[language]}</span>
             </button>
           ))}
         </div>
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <Ban className="w-5 h-5 text-red-500" />
-          {t.avoidLabel}
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><Ban className="w-5 h-5 text-red-500" />{t.avoidLabel}</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-          {AVOID_OPTIONS.map(opt => (
-            <button key={opt.id} type="button" onClick={() => setAvoid(prev => prev.includes(opt.id) ? prev.filter(s => s !== opt.id) : [...prev, opt.id])} className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-all ${avoid.includes(opt.id) ? 'bg-red-50 border-red-500 text-red-700 font-medium' : 'bg-white border-slate-200'}`}>
-              <opt.icon className="w-4 h-4" />
-              <span className="text-sm">{opt.label[language]}</span>
+          {AVOID_OPTIONS.map(o => (
+            <button key={o.id} type="button" onClick={() => setAvoid(prev => prev.includes(o.id) ? prev.filter(x => x !== o.id) : [...prev, o.id])} className={`flex items-center gap-2 px-4 py-3 rounded-lg border ${avoid.includes(o.id) ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-slate-200'}`}>
+              <o.icon className="w-4 h-4"/> <span className="text-sm">{o.label[language]}</span>
             </button>
           ))}
         </div>
-        <input type="text" value={customAvoid} onChange={e => setCustomAvoid(e.target.value)} placeholder={t.customAvoidPlaceholder} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500 outline-none text-sm" />
+        <input type="text" value={customAvoid} onChange={e => setCustomAvoid(e.target.value)} placeholder={t.customAvoidPlaceholder} className="w-full px-4 py-2 rounded-lg border border-slate-300 outline-none" />
       </div>
 
-      {error && <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-lg border border-red-200"><AlertCircle className="w-5 h-5" /> <span className="text-sm font-medium">{error}</span></div>}
+      {/* Pace, Companions, Budget */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Pace */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <label className="block text-sm font-semibold text-slate-800 mb-3">{t.pace}</label>
+            <div className="space-y-2">
+                {PACE_OPTIONS.map((opt) => (
+                    <button key={opt.id} type="button" onClick={() => setPace(opt.id)} disabled={isLoading} className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${pace === opt.id ? 'bg-emerald-50 border-emerald-500 text-emerald-800' : 'bg-slate-50 border-transparent text-slate-600 hover:bg-slate-100'}`}>
+                        <div className="font-medium">{opt.label[language]}</div>
+                    </button>
+                ))}
+            </div>
+        </div>
+        {/* Transport */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <label className="block text-sm font-semibold text-slate-800 mb-3">{t.transportMode}</label>
+            <div className="grid grid-cols-1 gap-2">
+                {TRANSPORT_OPTIONS.map((opt) => (
+                    <button key={opt.id} type="button" onClick={() => setTransportation(opt.id)} disabled={isLoading} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm border ${transportation === opt.id ? 'bg-sky-50 border-sky-500 text-sky-800' : 'bg-slate-50 border-transparent text-slate-600 hover:bg-slate-100'}`}>
+                        <opt.icon className="w-4 h-4 opacity-70" />{opt.label[language]}
+                    </button>
+                ))}
+            </div>
+        </div>
+        {/* Companions */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+             <div className="flex justify-between items-center mb-3">
+                <label className="text-sm font-semibold text-slate-800">{t.who}</label>
+                <input type="number" min="1" max="20" value={travelers} onChange={(e) => setTravelers(parseInt(e.target.value) || 1)} className="w-12 text-center bg-slate-50 rounded border border-slate-200 text-sm font-bold" />
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+                {COMPANION_OPTIONS.map((opt) => (
+                    <button key={opt.id} type="button" onClick={() => setCompanions(opt.id)} disabled={isLoading} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm border ${companions === opt.id ? 'bg-blue-50 border-blue-500 text-blue-800' : 'bg-slate-50 border-transparent text-slate-600 hover:bg-slate-100'}`}>
+                        <opt.icon className="w-4 h-4 opacity-70" />{opt.label[language]}
+                    </button>
+                ))}
+            </div>
+        </div>
+        {/* Budget */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <label className="block text-sm font-semibold text-slate-800 mb-3">{t.budget}</label>
+            <div className="grid grid-cols-1 gap-2">
+                {BUDGET_OPTIONS.map((opt) => (
+                    <button key={opt.id} type="button" onClick={() => setBudget(opt.id)} disabled={isLoading} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm border ${budget === opt.id ? 'bg-amber-50 border-amber-500 text-amber-800' : 'bg-slate-50 border-transparent text-slate-600 hover:bg-slate-100'}`}>
+                        <opt.icon className="w-4 h-4 opacity-70" />{opt.label[language]}
+                    </button>
+                ))}
+            </div>
+        </div>
+      </div>
 
-      <button type="submit" disabled={isLoading} className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all ${isLoading ? 'bg-slate-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
-        {isLoading ? t.planning : t.generateBtn}
-      </button>
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <label className="block text-sm font-medium text-slate-700 mb-2">{t.wishes}</label>
+        <textarea value={customKeywords} onChange={e => setCustomKeywords(e.target.value)} disabled={isLoading} placeholder={t.wishesPlaceholder} className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none" />
+      </div>
+      
+      {/* Optimized Provider Selector (Moved to Bottom) */}
+      <div className="pt-2">
+         <div className="flex items-center justify-between mb-3 px-1">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5" /> {t.providerLabel}
+            </label>
+         </div>
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <button
+                type="button"
+                onClick={() => setProvider('gemini')}
+                className={`group relative flex flex-row items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                    provider === 'gemini' 
+                    ? 'bg-white border-indigo-600 shadow-lg shadow-indigo-50 ring-0' 
+                    : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+                }`}
+            >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${provider === 'gemini' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                    <Search className="w-5 h-5" />
+                </div>
+                <div className="w-full">
+                    <div className="flex justify-between items-center w-full">
+                        <span className={`text-sm font-bold ${provider === 'gemini' ? 'text-indigo-900' : 'text-slate-700'}`}>Google Gemini</span>
+                        {provider === 'gemini' && <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>}
+                    </div>
+                    <span className="text-xs text-slate-500 mt-0.5 block">Multimodal + Search</span>
+                </div>
+            </button>
+
+            <button
+                type="button"
+                onClick={() => setProvider('siliconflow')}
+                className={`group relative flex flex-row items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                    provider === 'siliconflow' 
+                    ? 'bg-white border-purple-600 shadow-lg shadow-purple-50 ring-0' 
+                    : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+                }`}
+            >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${provider === 'siliconflow' ? 'bg-purple-100 text-purple-600' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                    <Zap className="w-5 h-5" />
+                </div>
+                 <div className="w-full">
+                    <div className="flex justify-between items-center w-full">
+                        <span className={`text-sm font-bold ${provider === 'siliconflow' ? 'text-purple-900' : 'text-slate-700'}`}>SiliconFlow</span>
+                        {provider === 'siliconflow' && <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse"></span>}
+                    </div>
+                    <span className="text-xs text-slate-500 mt-0.5 block">DeepSeek V3</span>
+                </div>
+            </button>
+         </div>
+
+         {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm mb-4 border border-red-100"><AlertCircle className="w-5 h-5 flex-shrink-0"/>{error}</div>}
+
+         <button type="submit" disabled={isLoading} className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 ${isLoading ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-indigo-200'}`}>
+            {isLoading ? (
+               <>
+               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+               {t.planning}
+               </>
+            ) : (
+                <>
+                <Sparkles className="w-5 h-5 text-indigo-100" />
+                {t.generateBtn}
+                </>
+            )}
+         </button>
+      </div>
+
     </form>
   );
 };

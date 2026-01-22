@@ -21,17 +21,27 @@ function App() {
     setView('loading');
     setError(null);
     try {
+      // Calls the /api/generate endpoint via aiService
       const result = await generateItinerary(prefs, language);
       setPlan(result);
       setView('result');
     } catch (err: any) {
       console.error(err);
-      setError(`${t.errorGen} (${err.message})`);
+      setError(`${t.errorGen} (${err.message || 'Unknown Error'})`);
       setView('form');
     }
   };
 
-  const resetApp = () => { setPlan(null); setLastPrefs(null); setView('form'); setError(null); };
+  const resetApp = () => {
+    setPlan(null);
+    setLastPrefs(null);
+    setView('form');
+    setError(null);
+  };
+
+  const backToForm = () => setView('form');
+  const returnToPlan = () => setView('result');
+  const toggleLanguage = () => setLanguage(prev => prev === 'en' ? 'zh' : 'en');
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
@@ -42,7 +52,7 @@ function App() {
             <span className="font-bold text-xl tracking-tight text-slate-800">{t.appTitle}</span>
           </div>
           <div className="flex items-center gap-3">
-             <button onClick={() => setLanguage(l => l === 'en' ? 'zh' : 'en')} className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-indigo-600 px-2 py-1 rounded-md">
+             <button onClick={toggleLanguage} className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-indigo-600 px-2 py-1 rounded-md">
                 <Globe className="w-4 h-4" /> {language === 'zh' ? 'EN' : '中文'}
              </button>
              <div className="text-xs font-medium bg-slate-100 px-3 py-1 rounded-full text-slate-600 hidden sm:block">{t.poweredBy}</div>
@@ -58,10 +68,12 @@ function App() {
               {t.heroSubtitle && <p className="text-slate-600 max-w-xl mx-auto text-lg">{t.heroSubtitle}</p>}
             </div>
             {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center text-sm font-medium">{error}</div>}
+            
             <TravelForm onSubmit={handleFormSubmit} isLoading={false} language={language} initialValues={lastPrefs} key={lastPrefs ? 'editing' : 'new'} />
+            
             {plan && (
                 <div className="fixed bottom-6 right-6 z-20 animate-fade-in-up">
-                    <button onClick={() => setView('result')} className="bg-slate-900 text-white hover:bg-slate-800 shadow-xl px-5 py-3 rounded-full font-bold flex items-center gap-2 transition-transform transform hover:scale-105">
+                    <button onClick={returnToPlan} className="bg-slate-900 text-white hover:bg-slate-800 shadow-xl px-5 py-3 rounded-full font-bold flex items-center gap-2 transition-transform transform hover:scale-105">
                         <Map className="w-5 h-5" /> {t.returnToPlan}
                     </button>
                 </div>
@@ -69,7 +81,7 @@ function App() {
           </>
         )}
         {view === 'loading' && <LoadingState language={language} />}
-        {view === 'result' && plan && <ItineraryDisplay plan={plan} onReset={resetApp} onBack={() => setView('form')} language={language} />}
+        {view === 'result' && plan && <ItineraryDisplay plan={plan} onReset={resetApp} onBack={backToForm} language={language} />}
       </main>
       <footer className="border-t border-slate-200 mt-auto py-8 text-center text-slate-500 text-sm">
         <p>&copy; {new Date().getFullYear()} {t.footer}</p>

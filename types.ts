@@ -1,5 +1,6 @@
+
 export type Language = 'zh' | 'en';
-export type AIProvider = 'gemini' | 'deepseek';
+export type AIProvider = 'gemini' | 'siliconflow';
 
 export interface TravelPreferences {
   destination: string;
@@ -15,7 +16,7 @@ export interface TravelPreferences {
   companions: string;
   budget: string;
   customKeywords: string;
-  provider?: AIProvider;
+  provider: AIProvider; // Added provider
 }
 
 export interface DayPlan {
