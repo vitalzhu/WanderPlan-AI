@@ -3,10 +3,9 @@ import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 
 export const config = {
-  runtime: 'edge', // Use Edge runtime for better performance
+  runtime: 'edge',
 };
 
-// --- Prompt Generation Logic (Moved from Client) ---
 const generatePrompt = (prefs, language, provider) => {
   const langName = language === 'zh' ? 'Chinese (Simplified)' : 'English';
   const currentDate = new Date().toISOString().split('T')[0];
@@ -104,7 +103,6 @@ const generatePrompt = (prefs, language, provider) => {
   `;
 };
 
-// --- Request Handler ---
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
@@ -113,78 +111,101 @@ export default async function handler(req) {
   try {
     const { prefs, language } = await req.json();
     const prompt = generatePrompt(prefs, language, prefs.provider);
-    
-    // --- GEMINI HANDLER ---
-    if (prefs.provider === 'gemini') {
-      const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY; // Vercel env var
-      if (!apiKey) throw new Error("Server Error: Missing Google API Key");
+    const encoder = new TextEncoder();
 
-      const ai = new GoogleGenAI({ apiKey });
-      
-      // Try with search
-      try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: prompt,
-          config: {
-            tools: [{ googleSearch: {} }],
-            systemInstruction: "You are a world-class travel agent AI. Return valid JSON.",
-            responseMimeType: "application/json"
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // --- GEMINI HANDLER ---
+          if (prefs.provider === 'gemini') {
+            const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+            if (!apiKey) throw new Error("Server Error: Missing Google API Key");
+
+            const ai = new GoogleGenAI({ apiKey });
+            
+            // Use stream to prevent timeout
+            const response = await ai.models.generateContentStream({
+              model: "gemini-3-flash-preview",
+              contents: prompt,
+              config: {
+                tools: [{ googleSearch: {} }],
+                systemInstruction: "You are a world-class travel agent AI. Return valid JSON.",
+                responseMimeType: "application/json"
+              }
+            });
+
+            let gatheredSources = [];
+            
+            for await (const chunk of response.stream) {
+              const text = chunk.text();
+              if (text) {
+                controller.enqueue(encoder.encode(text));
+              }
+              // Collect grounding metadata
+              if (chunk.groundingMetadata?.groundingChunks) {
+                 chunk.groundingMetadata.groundingChunks.forEach(c => {
+                   if (c.web?.uri && c.web?.title) {
+                     gatheredSources.push({ title: c.web.title, url: c.web.uri });
+                   }
+                 });
+              }
+            }
+            
+            // Append sources at the very end using a custom delimiter
+            controller.enqueue(encoder.encode(`\n\n__SOURCES__:${JSON.stringify(gatheredSources)}`));
+          
+          } 
+          // --- SILICONFLOW HANDLER ---
+          else if (prefs.provider === 'siliconflow') {
+            const apiKey = process.env.SILICONFLOW_API_KEY;
+            if (!apiKey) throw new Error("Server Error: Missing SiliconFlow API Key");
+
+            const openai = new OpenAI({
+              apiKey: apiKey,
+              baseURL: "https://api.siliconflow.cn/v1" 
+            });
+
+            const completion = await openai.chat.completions.create({
+              model: "deepseek-ai/DeepSeek-V3", 
+              messages: [
+                { role: "system", content: "You are a world-class travel agent AI. Always return valid JSON." },
+                { role: "user", content: prompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: 0.7,
+              stream: true, // Enable streaming
+            });
+
+            for await (const chunk of completion) {
+              const text = chunk.choices[0]?.delta?.content || "";
+              if (text) {
+                controller.enqueue(encoder.encode(text));
+              }
+            }
+            // Append empty sources for consistency
+            controller.enqueue(encoder.encode(`\n\n__SOURCES__:[]`));
+          } else {
+             throw new Error("Invalid Provider");
           }
-        });
-        
-        // Extract grounding chunks manually for the response
-        const sources = [];
-        if (response.candidates?.[0]?.groundingMetadata?.groundingChunks) {
-           response.candidates[0].groundingMetadata.groundingChunks.forEach(chunk => {
-             if (chunk.web?.uri && chunk.web?.title) {
-               sources.push({ title: chunk.web.title, url: chunk.web.uri });
-             }
-           });
+
+          controller.close();
+        } catch (err) {
+          // If error occurs during stream, we can't easily change status code, 
+          // but we can send an error message in body if needed.
+          // For now, we just close with error to abort stream.
+          console.error("Stream Error:", err);
+          controller.error(err);
         }
-
-        return new Response(JSON.stringify({ 
-          text: response.text,
-          sources: sources
-        }), { status: 200 });
-
-      } catch (err) {
-        console.warn("Gemini Search failed, falling back", err);
-        // Fallback without search
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-            config: { responseMimeType: "application/json" }
-        });
-        return new Response(JSON.stringify({ text: response.text, sources: [] }), { status: 200 });
       }
-    }
+    });
 
-    // --- SILICONFLOW HANDLER (OpenAI Compatible) ---
-    if (prefs.provider === 'siliconflow') {
-      const apiKey = process.env.SILICONFLOW_API_KEY; // Vercel env var
-      if (!apiKey) throw new Error("Server Error: Missing SiliconFlow API Key");
-
-      const openai = new OpenAI({
-        apiKey: apiKey,
-        baseURL: "https://api.siliconflow.cn/v1" 
-      });
-
-      const completion = await openai.chat.completions.create({
-        model: "deepseek-ai/DeepSeek-V3", // High quality, low cost model
-        messages: [
-          { role: "system", content: "You are a world-class travel agent AI. Always return valid JSON." },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-      });
-
-      const text = completion.choices[0].message.content;
-      return new Response(JSON.stringify({ text, sources: [] }), { status: 200 });
-    }
-
-    return new Response(JSON.stringify({ error: "Invalid Provider" }), { status: 400 });
+    return new Response(stream, {
+      headers: { 
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    });
 
   } catch (error) {
     console.error(error);

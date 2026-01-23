@@ -1,3 +1,4 @@
+
 import { TravelPreferences, TravelPlan, Language, SearchSource } from "../types";
 
 // Helper to sanitize the response string into a clean JSON object
@@ -71,13 +72,43 @@ export const generateItinerary = async (prefs: TravelPreferences, language: Lang
       throw new Error(errorData.error || `Server Error: ${response.status}`);
     }
 
-    const data = await response.json();
-    let text = data.text;
+    if (!response.body) {
+        throw new Error("No response body received");
+    }
+
+    // Handle Streaming Response
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
     
-    // Basic cleanup of markdown if the server returns it
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
+    }
+    
+    // Split the sources from the JSON text
+    // Format is: [JSON_TEXT]\n\n__SOURCES__:[JSON_SOURCES]
+    const splitKey = "\n\n__SOURCES__:";
+    const splitIndex = fullText.lastIndexOf(splitKey);
+    
+    let text = fullText;
+    let sources: SearchSource[] = [];
+
+    if (splitIndex !== -1) {
+        text = fullText.substring(0, splitIndex);
+        try {
+            const sourcesJson = fullText.substring(splitIndex + splitKey.length);
+            sources = JSON.parse(sourcesJson);
+        } catch (e) {
+            console.warn("Failed to parse sources from stream", e);
+        }
+    }
+
+    // Basic cleanup of markdown
     text = text.replace(/```json\s*/g, '').replace(/```\s*$/g, '').trim();
     
-    // Handle potential wrapper text
+    // Handle potential wrapper text to extract just the JSON object
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace !== -1) {
@@ -85,7 +116,7 @@ export const generateItinerary = async (prefs: TravelPreferences, language: Lang
     }
 
     const rawResult = JSON.parse(text);
-    return processJsonResponse(rawResult, prefs, data.sources);
+    return processJsonResponse(rawResult, prefs, sources);
 
   } catch (error) {
     console.error("API Call Failed:", error);
