@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { TravelPlan, Language, TimeBlock, LogisticsBlock } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
@@ -93,70 +93,76 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
 
   const currentPlan = isEditing ? editedPlan : plan;
 
-  // Render a Time Block (Morning/Afternoon/Evening)
-  const RenderTimeBlock = ({ 
+  // Render a Time Block as part of a timeline
+  const TimelineSection = ({ 
       title, 
       data, 
       icon: Icon, 
-      themeColor, 
+      colorClass, // text-amber-500, etc.
+      bgClass,    // bg-amber-100, etc.
       dayIndex, 
-      section 
+      section,
+      isLast
   }: { 
       title: string, 
       data: TimeBlock, 
       icon: any, 
-      themeColor: string, 
+      colorClass: string,
+      bgClass: string,
       dayIndex: number, 
-      section: 'morning' | 'afternoon' | 'evening' 
+      section: 'morning' | 'afternoon' | 'evening',
+      isLast?: boolean
   }) => {
-      // Determine colors based on themeColor prop
-      const bgClass = themeColor === 'amber' ? 'bg-amber-50 border-amber-100' : themeColor === 'sky' ? 'bg-sky-50 border-sky-100' : 'bg-indigo-50 border-indigo-100';
-      const textClass = themeColor === 'amber' ? 'text-amber-700' : themeColor === 'sky' ? 'text-sky-700' : 'text-indigo-700';
-      const iconBgClass = themeColor === 'amber' ? 'bg-amber-100' : themeColor === 'sky' ? 'bg-sky-100' : 'bg-indigo-100';
-
       return (
-          <div className={`p-4 rounded-xl border ${bgClass} relative`}>
-              <div className="flex items-start gap-3 mb-2">
-                  <div className={`p-1.5 rounded-lg shrink-0 ${iconBgClass} ${textClass}`}>
-                      <Icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                      <div className={`text-xs font-bold uppercase tracking-wider mb-0.5 ${textClass}`}>{title}</div>
-                      {isEditing ? (
-                          <input 
-                            value={data.title}
-                            onChange={(e) => handleNestedChange(dayIndex, section, 'title', e.target.value)}
-                            className="w-full text-base font-bold bg-white/50 border border-black/10 rounded px-2 py-1 mb-2"
-                          />
-                      ) : (
-                          <h4 className="text-base font-bold text-slate-900">{data.title}</h4>
-                      )}
-                  </div>
+          <div className="relative pl-8 sm:pl-10 pb-8 last:pb-0">
+              {/* Timeline Line */}
+              {!isLast && (
+                  <div className="absolute left-[11px] top-8 bottom-0 w-0.5 bg-slate-100"></div>
+              )}
+              
+              {/* Icon Marker */}
+              <div className={`absolute left-0 top-0 w-6 h-6 rounded-full flex items-center justify-center ring-4 ring-white z-10 ${bgClass} ${colorClass}`}>
+                  <Icon className="w-3.5 h-3.5" />
+              </div>
+
+              {/* Content Header */}
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-2">
+                  <span className={`text-xs font-bold uppercase tracking-wider ${colorClass}`}>{title}</span>
+                  {isEditing ? (
+                       <input 
+                         value={data.title}
+                         onChange={(e) => handleNestedChange(dayIndex, section, 'title', e.target.value)}
+                         className="flex-1 text-base font-bold bg-slate-50 border-b border-slate-300 focus:border-indigo-500 outline-none"
+                       />
+                  ) : (
+                       <h4 className="text-base font-bold text-slate-800">{data.title}</h4>
+                  )}
               </div>
               
-              <div className="pl-10">
+              {/* Main Content */}
+              <div className="text-sm text-slate-600 leading-relaxed space-y-3">
                   {isEditing ? (
                       <textarea 
                         value={data.content}
                         onChange={(e) => handleNestedChange(dayIndex, section, 'content', e.target.value)}
-                        className="w-full text-sm text-slate-700 leading-relaxed bg-white/50 border border-black/10 rounded p-2 min-h-[80px]"
+                        className="w-full min-h-[100px] p-2 bg-slate-50 rounded border border-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none"
                       />
                   ) : (
-                      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.content}</p>
+                      <p className="whitespace-pre-wrap">{data.content}</p>
                   )}
 
-                  {/* Tips Section */}
+                  {/* Tips Box */}
                   {(data.tips || isEditing) && (
-                      <div className="mt-3 bg-white/60 rounded-lg p-3 border border-black/5 flex gap-2">
-                          <Lightbulb className={`w-4 h-4 shrink-0 mt-0.5 ${textClass}`} />
+                      <div className="bg-orange-50/50 rounded-lg p-3 border border-orange-100 flex gap-3 mt-3">
+                          <Lightbulb className="w-4 h-4 shrink-0 text-orange-400 mt-0.5" />
                           <div className="flex-1">
-                              <span className={`text-xs font-bold block mb-1 ${textClass}`}>{t.warmTips}:</span>
+                              <span className="text-xs font-bold text-orange-600 block mb-1">{t.warmTips}</span>
                               {isEditing ? (
                                   <textarea 
                                     value={data.tips}
                                     onChange={(e) => handleNestedChange(dayIndex, section, 'tips', e.target.value)}
-                                    className="w-full text-xs bg-transparent border-b border-black/10 outline-none"
-                                    placeholder="Add tips here..."
+                                    className="w-full text-xs bg-transparent border-b border-orange-200 outline-none text-slate-600"
+                                    placeholder="Add tips..."
                                   />
                               ) : (
                                   <p className="text-xs text-slate-600">{data.tips}</p>
@@ -170,142 +176,185 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-24">
+    <div className="max-w-3xl mx-auto space-y-8 pb-24">
       
       {/* Overview Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden no-print">
-        <div className="bg-indigo-600 p-6 text-white">
-            <div className="flex justify-between items-center mb-6">
-                 <button onClick={onBack} className="flex items-center gap-1.5 text-xs bg-indigo-700/50 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition-colors border border-indigo-500/50">
-                    <ArrowLeft className="w-3.5 h-3.5" />{t.backToSearch}
-                 </button>
-                 <button onClick={onReset} className="text-xs bg-white/10 hover:bg-white/20 text-indigo-50 px-3 py-1.5 rounded-full transition-colors">
-                    {t.newTrip}
-                 </button>
-            </div>
-            <h1 className="text-2xl font-bold mb-2">{currentPlan.overview.trip_theme}</h1>
-            <div className="flex flex-wrap gap-3 text-indigo-100 text-sm">
-                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {currentPlan.overview.cities.join(' - ')}</span>
-                <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {currentPlan.overview.total_days} {t.daysUnit}</span>
+        <div className="relative overflow-hidden bg-slate-900 text-white p-8">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 translate-y-1/2 -translate-x-1/2"></div>
+            
+            <div className="relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                    <button onClick={onBack} className="group flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white transition-colors">
+                        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                        {t.backToSearch}
+                    </button>
+                    <button onClick={onReset} className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full transition-colors backdrop-blur-sm">
+                        {t.newTrip}
+                    </button>
+                </div>
+                
+                <div className="space-y-4">
+                    <h1 className="text-3xl font-bold tracking-tight">{currentPlan.overview.trip_theme}</h1>
+                    <div className="flex flex-wrap gap-4 text-sm text-slate-300">
+                        <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-indigo-400" /> {currentPlan.overview.cities.join(' - ')}</span>
+                        <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-indigo-400" /> {currentPlan.overview.total_days} {t.daysUnit}</span>
+                        <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-indigo-400" /> {currentPlan.overview.pace}</span>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div className="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-end">
+        {/* Sub-header actions */}
+        <div className="bg-white border-b border-slate-100 p-4 flex justify-between items-center">
+             <div className="flex gap-2">
+                 {currentPlan.overview.best_for.map((tag, i) => (
+                     <span key={i} className="text-xs font-medium px-2 py-1 bg-slate-50 text-slate-500 rounded-md border border-slate-100">{tag}</span>
+                 ))}
+             </div>
              <div className="flex items-center gap-2">
                  {!isEditing ? (
-                     <button onClick={handleEditToggle} className="flex items-center gap-1.5 bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
-                        <Edit2 className="w-4 h-4" /> {t.edit}
+                     <button onClick={handleEditToggle} className="flex items-center gap-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                        <Edit2 className="w-3.5 h-3.5" /> {t.edit}
                      </button>
                  ) : (
                      <div className="flex items-center gap-2">
-                        <button onClick={handleEditToggle} className="flex items-center gap-1.5 bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors"><X className="w-4 h-4" /> {t.cancel}</button>
-                        <button onClick={handleSave} className="flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"><Save className="w-4 h-4" /> {t.save}</button>
+                        <button onClick={handleEditToggle} className="text-xs px-3 py-1.5 text-slate-500 hover:bg-slate-50 rounded-lg">{t.cancel}</button>
+                        <button onClick={handleSave} className="text-xs px-3 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg shadow-sm flex items-center gap-1"><Save className="w-3 h-3"/> {t.save}</button>
                      </div>
                  )}
              </div>
         </div>
       </div>
 
-      {/* Daily Timeline */}
+      {/* Daily Timeline - Cohesive Card Design */}
       <div className="space-y-6">
         {currentPlan.daily_plan.map((day, index) => {
           const isOpen = expandedDay === 'ALL' || expandedDay === day.day;
           return (
-            <div key={day.day} className={`bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden transition-all print:border-0 print:shadow-none print:break-inside-avoid ${isEditing ? 'ring-2 ring-indigo-50 border-indigo-100' : ''}`}>
+            <div key={day.day} className={`bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 print:border-0 print:shadow-none print:break-inside-avoid ${isEditing ? 'ring-2 ring-indigo-50 border-indigo-100' : 'hover:shadow-md'}`}>
               
-              {/* Header */}
+              {/* Day Header - Minimalist */}
               <button 
                 onClick={() => toggleDay(day.day)}
-                className="w-full p-0 transition-colors text-left no-print block"
+                className="w-full text-left group no-print"
               >
-                <div className={`p-5 flex items-center justify-between border-b ${isOpen ? 'border-slate-100 bg-slate-50' : 'border-transparent bg-white hover:bg-slate-50'}`}>
-                    <div className="flex items-center gap-4">
-                        <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl border shadow-sm ${isOpen ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700'}`}>
-                             <span className="text-[10px] font-bold uppercase opacity-80">Day</span>
-                             <span className="text-2xl font-extrabold leading-none">{day.day}</span>
-                        </div>
-                        <div>
-                            <div className="font-bold text-lg text-slate-900">{day.city}</div>
-                            <div className="text-sm text-slate-500 font-medium">{day.theme}</div>
-                        </div>
+                <div className={`px-6 py-5 flex items-start gap-4 transition-colors ${isOpen ? 'bg-white' : 'hover:bg-slate-50'}`}>
+                    {/* Date Badge */}
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center font-bold border transition-colors ${isOpen ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-400 group-hover:border-slate-300'}`}>
+                        <span className="text-[10px] uppercase opacity-70">Day</span>
+                        <span className="text-xl leading-none">{day.day}</span>
                     </div>
-                    {isOpen ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
+                    
+                    {/* Header Text */}
+                    <div className="flex-1 min-w-0 pt-0.5">
+                         <div className="flex justify-between items-start">
+                             <h3 className={`text-lg font-bold truncate pr-4 ${isOpen ? 'text-indigo-950' : 'text-slate-700'}`}>{day.city}</h3>
+                             {isOpen ? <ChevronUp className="w-5 h-5 text-slate-300" /> : <ChevronDown className="w-5 h-5 text-slate-300" />}
+                         </div>
+                         <p className="text-sm text-slate-500 font-medium truncate mt-0.5">{day.theme}</p>
+                    </div>
                 </div>
               </button>
 
               {/* Print Header */}
-              <div className="hidden print:block p-5 border-b border-slate-200">
-                 <h3 className="text-xl font-bold text-slate-900">Day {day.day} | {day.theme}</h3>
+              <div className="hidden print:block p-6 border-b border-slate-100">
+                 <h3 className="text-2xl font-bold text-slate-900">Day {day.day} - {day.city}</h3>
+                 <p className="text-slate-500">{day.theme}</p>
               </div>
 
               {isOpen && (
-                <div className="p-5 pt-5 space-y-6">
-                    {/* Morning (Amber) */}
-                    <RenderTimeBlock 
-                        title={t.morning} 
-                        data={day.morning} 
-                        icon={Sun} 
-                        themeColor="amber" 
-                        dayIndex={index} 
-                        section="morning" 
-                    />
+                <div>
+                    {/* Main Content Area */}
+                    <div className="px-6 py-2">
+                         {/* Timeline Container */}
+                         <div className="mt-2 space-y-1">
+                            {/* Morning */}
+                            <TimelineSection 
+                                title={t.morning} 
+                                data={day.morning} 
+                                icon={Sun} 
+                                colorClass="text-amber-500" 
+                                bgClass="bg-amber-50"
+                                dayIndex={index} 
+                                section="morning" 
+                            />
+                            
+                            {/* Afternoon */}
+                            <TimelineSection 
+                                title={t.afternoon} 
+                                data={day.afternoon} 
+                                icon={CloudSun} 
+                                colorClass="text-sky-500" 
+                                bgClass="bg-sky-50"
+                                dayIndex={index} 
+                                section="afternoon" 
+                            />
+                            
+                            {/* Evening */}
+                            <TimelineSection 
+                                title={t.evening} 
+                                data={day.evening} 
+                                icon={Moon} 
+                                colorClass="text-indigo-500" 
+                                bgClass="bg-indigo-50"
+                                dayIndex={index} 
+                                section="evening" 
+                                isLast={true}
+                            />
+                         </div>
+                    </div>
 
-                    {/* Afternoon (Sky) */}
-                    <RenderTimeBlock 
-                        title={t.afternoon} 
-                        data={day.afternoon} 
-                        icon={CloudSun} 
-                        themeColor="sky" 
-                        dayIndex={index} 
-                        section="afternoon" 
-                    />
-
-                    {/* Evening (Indigo) */}
-                    <RenderTimeBlock 
-                        title={t.evening} 
-                        data={day.evening} 
-                        icon={Moon} 
-                        themeColor="indigo" 
-                        dayIndex={index} 
-                        section="evening" 
-                    />
-
-                    {/* Logistics Footer */}
-                    <div className="bg-slate-800 rounded-xl p-4 text-slate-300 text-sm mt-4 shadow-lg">
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1">
-                            <Info className="w-3.5 h-3.5" /> {t.logistics}
+                    {/* Integrated Logistics Footer */}
+                    <div className="bg-slate-50/80 border-t border-slate-100 px-6 py-5 mt-4">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="w-1 h-4 bg-slate-300 rounded-full"></span>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.logistics}</span>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="flex items-start gap-2">
-                                <Car className="w-4 h-4 mt-0.5 text-slate-400" />
-                                <div>
-                                    <span className="block font-bold text-white text-xs mb-0.5">{t.driving}</span>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Driving */}
+                            <div className="flex gap-3 items-start">
+                                <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 shadow-sm shrink-0">
+                                    <Car className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                    <span className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">{t.driving}</span>
                                     {isEditing ? (
-                                        <input value={day.logistics.driving} onChange={e => handleNestedChange(index, 'logistics', 'driving', e.target.value)} className="bg-transparent border-b border-slate-600 w-full text-xs" />
+                                        <input value={day.logistics.driving} onChange={e => handleNestedChange(index, 'logistics', 'driving', e.target.value)} className="bg-transparent border-b border-slate-300 w-full text-sm" />
                                     ) : (
-                                        <span>{day.logistics.driving}</span>
+                                        <p className="text-sm font-medium text-slate-700 leading-tight">{day.logistics.driving}</p>
                                     )}
                                 </div>
                             </div>
-                             <div className="flex items-start gap-2">
-                                <Utensils className="w-4 h-4 mt-0.5 text-slate-400" />
-                                <div>
-                                    <span className="block font-bold text-white text-xs mb-0.5">{t.dining}</span>
+
+                            {/* Dining */}
+                            <div className="flex gap-3 items-start">
+                                <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 shadow-sm shrink-0">
+                                    <Utensils className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                    <span className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">{t.dining}</span>
                                     {isEditing ? (
-                                        <input value={day.logistics.dining} onChange={e => handleNestedChange(index, 'logistics', 'dining', e.target.value)} className="bg-transparent border-b border-slate-600 w-full text-xs" />
+                                        <input value={day.logistics.dining} onChange={e => handleNestedChange(index, 'logistics', 'dining', e.target.value)} className="bg-transparent border-b border-slate-300 w-full text-sm" />
                                     ) : (
-                                        <span>{day.logistics.dining}</span>
+                                        <p className="text-sm font-medium text-slate-700 leading-tight">{day.logistics.dining}</p>
                                     )}
                                 </div>
                             </div>
-                             <div className="flex items-start gap-2">
-                                <BedDouble className="w-4 h-4 mt-0.5 text-slate-400" />
-                                <div>
-                                    <span className="block font-bold text-white text-xs mb-0.5">{t.stay}</span>
+
+                            {/* Accommodation */}
+                            <div className="flex gap-3 items-start">
+                                <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 shadow-sm shrink-0">
+                                    <BedDouble className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                    <span className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">{t.stay}</span>
                                     {isEditing ? (
-                                        <input value={day.logistics.accommodation} onChange={e => handleNestedChange(index, 'logistics', 'accommodation', e.target.value)} className="bg-transparent border-b border-slate-600 w-full text-xs" />
+                                        <input value={day.logistics.accommodation} onChange={e => handleNestedChange(index, 'logistics', 'accommodation', e.target.value)} className="bg-transparent border-b border-slate-300 w-full text-sm" />
                                     ) : (
-                                        <span>{day.logistics.accommodation}</span>
+                                        <p className="text-sm font-medium text-slate-700 leading-tight">{day.logistics.accommodation}</p>
                                     )}
                                 </div>
                             </div>
