@@ -1,5 +1,5 @@
 
-import { TravelPreferences, TravelPlan, Language, SearchSource } from "../types";
+import { TravelPreferences, TravelPlan, Language, SearchSource, ActivityBlock } from "../types";
 
 // Helper to sanitize the response string into a clean JSON object
 const sanitizeString = (val: unknown): string => {
@@ -16,6 +16,17 @@ const sanitizeArray = (val: unknown): string[] => {
     if (Array.isArray(val)) return val.map(v => sanitizeString(v));
     if (typeof val === 'string') return [val];
     return [];
+};
+
+const sanitizeActivityBlock = (val: any): ActivityBlock => {
+    return {
+        time: sanitizeString(val?.time),
+        activity: sanitizeString(val?.activity),
+        description: sanitizeString(val?.description),
+        why_this_place: sanitizeString(val?.why_this_place),
+        reservation: sanitizeString(val?.reservation),
+        items_to_bring: sanitizeString(val?.items_to_bring),
+    };
 };
 
 const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: SearchSource[]): TravelPlan => {
@@ -36,9 +47,10 @@ const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: S
         daily_plan: (Array.isArray(rawJson.daily_plan) ? rawJson.daily_plan : []).map((day: any) => ({
             day: Number(day.day),
             city: sanitizeString(day.city),
-            morning: sanitizeString(day.morning),
-            afternoon: sanitizeString(day.afternoon),
-            evening: sanitizeString(day.evening),
+            theme: sanitizeString(day.theme),
+            morning: sanitizeActivityBlock(day.morning),
+            afternoon: sanitizeActivityBlock(day.afternoon),
+            evening: sanitizeActivityBlock(day.evening),
             notes: sanitizeString(day.notes),
             plan_b: sanitizeString(day.plan_b)
         })),

@@ -1,3 +1,4 @@
+
 import { Language } from './types';
 
 export const TRANSLATIONS: Record<Language, Record<string, string>> = {
@@ -69,6 +70,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     providerLabel: "模型服务商",
     geminiLabel: "Google Gemini (推荐/含搜索)",
     siliconFlowLabel: "硅基流动 (DeepSeek/Qwen)",
+    dailyTheme: "今日主题",
+    whyHere: "推荐理由",
+    reservation: "预约/门票",
+    bring: "建议携带",
+    time: "时间",
+    activity: "活动",
   },
   en: {
     appTitle: "WanderPlan AI",
@@ -138,5 +145,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     providerLabel: "AI Provider",
     geminiLabel: "Google Gemini (Recommended)",
     siliconFlowLabel: "SiliconFlow (DeepSeek/Qwen)",
+    dailyTheme: "Theme",
+    whyHere: "Why Here",
+    reservation: "Booking",
+    bring: "Bring",
+    time: "Time",
+    activity: "Activity",
   }
 };

@@ -16,15 +16,25 @@ export interface TravelPreferences {
   companions: string;
   budget: string;
   customKeywords: string;
-  provider: AIProvider; // Added provider
+  provider: AIProvider;
+}
+
+export interface ActivityBlock {
+  time: string;
+  activity: string;
+  description: string;
+  why_this_place: string;
+  reservation: string;
+  items_to_bring: string;
 }
 
 export interface DayPlan {
   day: number;
   city: string;
-  morning: string;
-  afternoon: string;
-  evening: string;
+  theme: string; // Added theme
+  morning: ActivityBlock;   // Changed from string
+  afternoon: ActivityBlock; // Changed from string
+  evening: ActivityBlock;   // Changed from string
   notes: string;
   plan_b: string;
 }

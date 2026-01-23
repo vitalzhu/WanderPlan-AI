@@ -34,7 +34,7 @@ const generatePrompt = (prefs, language, provider) => {
 
     Language Requirement:
     - Output the content strictly in ${langName}.
-    - IMPORTANT: The JSON keys (e.g., "overview", "daily_plan", "weather_info") MUST remain in English. Only the values should be in ${langName}.
+    - IMPORTANT: The JSON keys (e.g., "overview", "daily_plan", "morning", "why_this_place") MUST remain in English. Only the values should be in ${langName}.
 
     Planning Logic (STRICT):
     1. Travel Philosophy: One main activity per morning, one flexible activity per afternoon. Evenings are low-effort. Max 2 must-do items/day.
@@ -55,17 +55,21 @@ const generatePrompt = (prefs, language, provider) => {
        - If "Public Transit", ensure activities are accessible by metro/bus/train and mention key routes.
        - If "Private Charter", assume door-to-door convenience but suggest worthwhile stops.
     8. Exclusions: STRICTLY AVOID suggesting activities, locations, or areas related to: ${avoidList}.
-    9. TIME & LOGISTICS (MANDATORY):
-       - For every major activity in 'morning', 'afternoon', and 'evening', strictly START with the suggested **Start Time** and **Duration**.
-       - Format: "**09:00 (2h)** Activity Name..." (Use bolding markers ** for the time/duration).
-       - If moving between cities, explicitly state the **Departure Time** and **Travel Duration** (e.g., "**08:00 (1.5h travel)** Take Shinkansen to Kyoto").
+    9. DETAILED DAILY LOGISTICS (MANDATORY):
+       - For each part of the day (morning, afternoon, evening), you MUST provide a structured object.
+       - "time": Start time and duration (e.g., "09:00 (2h)").
+       - "activity": The name of the main location/activity.
+       - "description": A vivid description of what to do.
+       - "why_this_place": A specific reason why this location was chosen (e.g., "Famous for X", "Fits the quiet vibe").
+       - "reservation": Booking requirements (e.g., "No need", "Book 2 weeks ahead").
+       - "items_to_bring": Recommended items (e.g., "Comfortable shoes", "Camera", "Sunscreen").
+       - "theme": A short, catchy theme for the specific day (e.g., "Historical Deep Dive", "Nature & Relaxation").
     ${isCampingTrip ? `
     10. CAMPING & HIKING SPECIAL INSTRUCTIONS (CRITICAL):
        - Since the user selected "Long-distance Camping", the itinerary MUST focus on hiking trails and camping.
-       - Daily Plan: Explicitly mention hiking distances (km/miles) and elevation gain/loss for each day where applicable.
-       - Accommodation: You MUST suggest specific campsites (official or wild camping spots) instead of hotels for the nights on the trail.
-       - Logistics: Mention water sources, resupply points for food, and permit requirements if any.
-       - Safety: Highlight terrain difficulties and mandatory gear for this specific route.
+       - "morning/afternoon/evening" should reflect the hike progress.
+       - In "accommodation_tips", MUST suggest specific campsites (official or wild camping spots).
+       - In "items_to_bring", mention specific gear (e.g., "Water filter", "Trekking poles").
     ` : ''}
 
     OUTPUT FORMAT:
@@ -88,9 +92,31 @@ const generatePrompt = (prefs, language, provider) => {
         {
           "day": number,
           "city": "string",
-          "morning": "string",
-          "afternoon": "string",
-          "evening": "string",
+          "theme": "string",
+          "morning": {
+            "time": "string",
+            "activity": "string",
+            "description": "string",
+            "why_this_place": "string",
+            "reservation": "string",
+            "items_to_bring": "string"
+          },
+          "afternoon": {
+            "time": "string",
+            "activity": "string",
+            "description": "string",
+            "why_this_place": "string",
+            "reservation": "string",
+            "items_to_bring": "string"
+          },
+          "evening": {
+            "time": "string",
+            "activity": "string",
+            "description": "string",
+            "why_this_place": "string",
+            "reservation": "string",
+            "items_to_bring": "string"
+          },
           "notes": "string",
           "plan_b": "string"
         }
