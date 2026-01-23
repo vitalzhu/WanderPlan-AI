@@ -34,46 +34,48 @@ const generatePrompt = (prefs, language, provider) => {
 
     Language Requirement:
     - Output the content strictly in ${langName}.
-    - IMPORTANT: The JSON keys (e.g., "overview", "daily_plan", "morning", "why_this_place") MUST remain in English. Only the values should be in ${langName}.
+    - IMPORTANT: The JSON keys MUST remain in English. Only the values should be in ${langName}.
 
-    Planning Logic (STRICT):
-    1. Travel Philosophy: One main activity per morning, one flexible activity per afternoon. Evenings are low-effort. Max 2 must-do items/day.
-    2. City & Route: 
-       - Start from the arrival point (usually ${prefs.destination} or a major hub).
-       - You MUST include visits to the following required stopovers: ${stopovers}.
-       - Ensure the "overview.cities" list includes the main destination AND all visited stopovers.
-       - Organize these stops in a logical geographical order to minimize travel time and backtracking.
-       - Minimize hotel changes where possible, but stay overnight in stopovers if it makes sense for the schedule.
-    3. Plan B: Always provide a backup plan (indoor/low energy) for bad weather or fatigue.
-    4. Reality Check: Assume day 1 and day ${prefs.days} are partial travel days if > 2 days.
-    5. Group Size Considerations: Since there are ${prefs.travelers} people, ensure activities and transport are appropriate for this group size.
-    6. Weather & Clothing: 
-       ${isGemini ? `- USE GOOGLE SEARCH to find the historical weather average or forecast (if dates are close) for ${prefs.destination} during the trip dates (${prefs.startDate}).` : `- Estimate the historical weather average for ${prefs.destination} during the trip dates (${prefs.startDate}) based on your knowledge.`}
-       - Provide SPECIFIC temperature ranges (e.g., 20-25°C), general weather conditions (e.g., Sunny, Rainy, Cloudy), humidity levels (e.g., Low, High, 80%), and clothing advice.
-    7. Transport Mode: The user plans to use ${prefs.transportation}. 
-       - If "Self-driving", include parking tips and scenic driving routes where applicable.
-       - If "Public Transit", ensure activities are accessible by metro/bus/train and mention key routes.
-       - If "Private Charter", assume door-to-door convenience but suggest worthwhile stops.
-    8. Exclusions: STRICTLY AVOID suggesting activities, locations, or areas related to: ${avoidList}.
-    9. DETAILED DAILY LOGISTICS (MANDATORY):
-       - For each part of the day (morning, afternoon, evening), you MUST provide a structured object.
-       - "time": Start time and duration (e.g., "09:00 (2h)").
-       - "activity": The name of the main location/activity.
-       - "description": A vivid description of what to do.
-       - "why_this_place": A concise reason why this location was chosen.
-       - "reservation": Booking requirements. Returns empty string "" if no reservation is needed (do not say "No need").
-       - "items_to_bring": Recommended items (e.g. camera). Returns empty string "" if nothing special is needed.
-       - "theme": A short, catchy theme for the specific day (e.g., "Historical Deep Dive", "Nature & Relaxation").
-    ${isCampingTrip ? `
-    10. CAMPING & HIKING SPECIAL INSTRUCTIONS (CRITICAL):
-       - Since the user selected "Long-distance Camping", the itinerary MUST focus on hiking trails and camping.
-       - "morning/afternoon/evening" should reflect the hike progress.
-       - In "accommodation_tips", MUST suggest specific campsites (official or wild camping spots).
-       - In "items_to_bring", mention specific gear (e.g., "Water filter", "Trekking poles").
-    ` : ''}
+    Planning Logic:
+    1. Organize route logically to minimize backtracking.
+    2. Include all stopovers: ${stopovers}.
+    3. Weather: ${isGemini ? "Use Google Search to find real/avg weather." : "Estimate historical weather."}
+    
+    CRITICAL: STRUCTURED DAILY FORMAT
+    For each day, you MUST provide data matching this exact structured template.
+    
+    1. SUMMARY: A one-sentence summary of the route or core experience (Location + Keywords).
+    
+    2. MORNING (Focus: Meeting & Core Experience):
+       - subtitle: A short title (e.g., "Meeting & Core Experience").
+       - overview: Meeting method, departure time, main route explanation.
+       - core_experience: The single most important landscape/activity of the day.
+       - highlights: Why it's worth coming (emotional value/scarcity).
+       - photo_tips: Angles, best time, precautions.
+       - season_tips: Dependency on season, weather, or time.
+
+    3. AFTERNOON (Focus: Nature Exploration / Supplementary):
+       - subtitle: A short title (e.g., "Nature Exploration").
+       - spot_name: Name of the spot/activity.
+       - landscape_features: Description of the landscape.
+       - play_style: Strolling / Photos / Light Hiking / Free Exploration, etc.
+       - risk_tips: Ice, weather, natural formation probability, etc.
+
+    4. EVENING (Focus: Return & Stay):
+       - subtitle: A short title (e.g., "Return & Accommodation").
+       - schedule: Return / Transfer / Check-in details.
+       - accommodation_features: Environment, atmosphere, is it experiential?
+       - night_suggestions: Walk / Rest / No high-intensity activity.
+
+    5. PRACTICAL INFO:
+       - driving_time: Approx driving hours/distance.
+       - dining: Lunch/Dinner arrangements.
+       - accommodation: Hotel name or area.
+       - physical_rating: e.g., "Low", "Medium", "High".
+       - clothing_gear: What to wear/bring.
 
     OUTPUT FORMAT:
-    You must return a valid JSON object. Do not wrap it in markdown code blocks. The JSON must match this schema:
+    Return a valid JSON object matching this schema:
     {
       "overview": {
         "trip_theme": "string",
@@ -93,32 +95,35 @@ const generatePrompt = (prefs, language, provider) => {
           "day": number,
           "city": "string",
           "theme": "string",
+          "summary": "string",
           "morning": {
-            "time": "string",
-            "activity": "string",
-            "description": "string",
-            "why_this_place": "string",
-            "reservation": "string",
-            "items_to_bring": "string"
+            "subtitle": "string",
+            "overview": "string",
+            "core_experience": "string",
+            "highlights": "string",
+            "photo_tips": "string",
+            "season_tips": "string"
           },
           "afternoon": {
-            "time": "string",
-            "activity": "string",
-            "description": "string",
-            "why_this_place": "string",
-            "reservation": "string",
-            "items_to_bring": "string"
+            "subtitle": "string",
+            "spot_name": "string",
+            "landscape_features": "string",
+            "play_style": "string",
+            "risk_tips": "string"
           },
           "evening": {
-            "time": "string",
-            "activity": "string",
-            "description": "string",
-            "why_this_place": "string",
-            "reservation": "string",
-            "items_to_bring": "string"
+            "subtitle": "string",
+            "schedule": "string",
+            "accommodation_features": "string",
+            "night_suggestions": "string"
           },
-          "notes": "string",
-          "plan_b": "string"
+          "practical_info": {
+            "driving_time": "string",
+            "dining": "string",
+            "accommodation": "string",
+            "physical_rating": "string",
+            "clothing_gear": "string"
+          }
         }
       ],
       "must_book_in_advance": ["string"],

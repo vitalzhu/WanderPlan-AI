@@ -1,5 +1,5 @@
 
-import { TravelPreferences, TravelPlan, Language, SearchSource, ActivityBlock } from "../types";
+import { TravelPreferences, TravelPlan, Language, SearchSource, MorningBlock, AfternoonBlock, EveningBlock, PracticalInfo } from "../types";
 
 // Helper to sanitize the response string into a clean JSON object
 const sanitizeString = (val: unknown): string => {
@@ -18,16 +18,37 @@ const sanitizeArray = (val: unknown): string[] => {
     return [];
 };
 
-const sanitizeActivityBlock = (val: any): ActivityBlock => {
-    return {
-        time: sanitizeString(val?.time),
-        activity: sanitizeString(val?.activity),
-        description: sanitizeString(val?.description),
-        why_this_place: sanitizeString(val?.why_this_place),
-        reservation: sanitizeString(val?.reservation),
-        items_to_bring: sanitizeString(val?.items_to_bring),
-    };
-};
+const sanitizeMorning = (val: any): MorningBlock => ({
+    subtitle: sanitizeString(val?.subtitle),
+    overview: sanitizeString(val?.overview),
+    core_experience: sanitizeString(val?.core_experience),
+    highlights: sanitizeString(val?.highlights),
+    photo_tips: sanitizeString(val?.photo_tips),
+    season_tips: sanitizeString(val?.season_tips),
+});
+
+const sanitizeAfternoon = (val: any): AfternoonBlock => ({
+    subtitle: sanitizeString(val?.subtitle),
+    spot_name: sanitizeString(val?.spot_name),
+    landscape_features: sanitizeString(val?.landscape_features),
+    play_style: sanitizeString(val?.play_style),
+    risk_tips: sanitizeString(val?.risk_tips),
+});
+
+const sanitizeEvening = (val: any): EveningBlock => ({
+    subtitle: sanitizeString(val?.subtitle),
+    schedule: sanitizeString(val?.schedule),
+    accommodation_features: sanitizeString(val?.accommodation_features),
+    night_suggestions: sanitizeString(val?.night_suggestions),
+});
+
+const sanitizePractical = (val: any): PracticalInfo => ({
+    driving_time: sanitizeString(val?.driving_time),
+    dining: sanitizeString(val?.dining),
+    accommodation: sanitizeString(val?.accommodation),
+    physical_rating: sanitizeString(val?.physical_rating),
+    clothing_gear: sanitizeString(val?.clothing_gear),
+});
 
 const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: SearchSource[]): TravelPlan => {
     const result: TravelPlan = {
@@ -48,9 +69,11 @@ const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: S
             day: Number(day.day),
             city: sanitizeString(day.city),
             theme: sanitizeString(day.theme),
-            morning: sanitizeActivityBlock(day.morning),
-            afternoon: sanitizeActivityBlock(day.afternoon),
-            evening: sanitizeActivityBlock(day.evening),
+            summary: sanitizeString(day.summary),
+            morning: sanitizeMorning(day.morning),
+            afternoon: sanitizeAfternoon(day.afternoon),
+            evening: sanitizeEvening(day.evening),
+            practical_info: sanitizePractical(day.practical_info),
             notes: sanitizeString(day.notes),
             plan_b: sanitizeString(day.plan_b)
         })),
