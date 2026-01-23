@@ -41,6 +41,11 @@ const generatePrompt = (prefs, language, provider) => {
     - Do NOT use bullet points for the main content. Use continuous sentences to describe the experience, emotions, and scenery.
     - Example: "After breakfast, the driver will pick you up... We head south to Zhaosu..."
 
+    CRITICAL TASKS:
+    1. **Route Planning**: Organize the route logically to minimize backtracking and include all stopovers (${stopovers}).
+    2. **Weather Search**: ${isGemini ? `Use Google Search to find the specific weather forecast (if close to ${currentDate}) or historical weather averages for ${prefs.destination} during ${prefs.startDate} to ${prefs.endDate}.` : "Estimate historical weather for the dates."}
+       - Based on the weather, provide specific temperature ranges and clothing/footwear advice.
+
     Structure per Day:
     1. **Morning/Afternoon/Evening**:
        - 'title': The main location or activity name (e.g. "Zhaosu Wetland Park").
@@ -62,10 +67,10 @@ const generatePrompt = (prefs, language, provider) => {
         "best_for": ["string"]
       },
       "weather_info": {
-        "temperature_range": "string",
-        "weather_condition": "string",
-        "humidity": "string",
-        "clothing_advice": "string"
+        "temperature_range": "e.g. -5°C to 10°C",
+        "weather_condition": "e.g. Snowy, Sunny, Cloudy",
+        "humidity": "e.g. Dry, Medium, High",
+        "clothing_advice": "Detailed clothing AND footwear advice based on the temperature."
       },
       "daily_plan": [
         {

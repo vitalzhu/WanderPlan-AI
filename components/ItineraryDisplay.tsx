@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { TravelPlan, Language, TimeBlock, LogisticsBlock } from '../types';
+import { TravelPlan, Language, TimeBlock, LogisticsBlock, WeatherInfo } from '../types';
 import { TRANSLATIONS } from '../translations';
 import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation } from 'lucide-react';
 
@@ -57,6 +57,16 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
           }
       };
       setEditedPlan({ ...editedPlan, daily_plan: newDailyPlan });
+  };
+
+  const handleWeatherChange = (field: keyof WeatherInfo, value: string) => {
+      setEditedPlan({
+          ...editedPlan,
+          weather_info: {
+              ...editedPlan.weather_info,
+              [field]: value
+          }
+      });
   };
 
   const generateTextContent = () => {
@@ -225,6 +235,66 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
                      </div>
                  )}
              </div>
+        </div>
+      </div>
+
+      {/* Weather Card (New) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 transition-all hover:shadow-md">
+        <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-sky-100 text-sky-600 rounded-lg">
+                <CloudSun className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800">{t.weatherTitle}</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div>
+                <div className="flex items-center gap-2 mb-2 text-slate-400">
+                    <Thermometer className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">{t.temperature}</span>
+                </div>
+                {isEditing ? (
+                    <input value={currentPlan.weather_info.temperature_range} onChange={e => handleWeatherChange('temperature_range', e.target.value)} className="w-full border-b border-slate-200 focus:border-indigo-500 outline-none font-medium text-slate-700" />
+                ) : (
+                    <p className="font-medium text-slate-700">{currentPlan.weather_info.temperature_range}</p>
+                )}
+            </div>
+            
+            <div>
+                <div className="flex items-center gap-2 mb-2 text-slate-400">
+                    <CloudSun className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">{t.weatherCondition}</span>
+                </div>
+                 {isEditing ? (
+                    <input value={currentPlan.weather_info.weather_condition} onChange={e => handleWeatherChange('weather_condition', e.target.value)} className="w-full border-b border-slate-200 focus:border-indigo-500 outline-none font-medium text-slate-700" />
+                ) : (
+                    <p className="font-medium text-slate-700">{currentPlan.weather_info.weather_condition}</p>
+                )}
+            </div>
+
+            <div>
+                 <div className="flex items-center gap-2 mb-2 text-slate-400">
+                    <Droplets className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">{t.humidity}</span>
+                </div>
+                 {isEditing ? (
+                    <input value={currentPlan.weather_info.humidity} onChange={e => handleWeatherChange('humidity', e.target.value)} className="w-full border-b border-slate-200 focus:border-indigo-500 outline-none font-medium text-slate-700" />
+                ) : (
+                    <p className="font-medium text-slate-700">{currentPlan.weather_info.humidity}</p>
+                )}
+            </div>
+
+            <div className="col-span-2 md:col-span-1">
+                 <div className="flex items-center gap-2 mb-2 text-slate-400">
+                    <Shirt className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">{t.clothing}</span>
+                </div>
+                 {isEditing ? (
+                    <textarea value={currentPlan.weather_info.clothing_advice} onChange={e => handleWeatherChange('clothing_advice', e.target.value)} className="w-full border border-slate-200 rounded p-1 text-sm focus:border-indigo-500 outline-none font-medium text-slate-700 min-h-[50px] resize-none" />
+                ) : (
+                    <p className="font-medium text-slate-700 text-sm leading-snug">{currentPlan.weather_info.clothing_advice}</p>
+                )}
+            </div>
         </div>
       </div>
 
