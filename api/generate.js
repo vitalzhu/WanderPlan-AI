@@ -60,9 +60,9 @@ const generatePrompt = (prefs, language, provider) => {
        - "time": Start time and duration (e.g., "09:00 (2h)").
        - "activity": The name of the main location/activity.
        - "description": A vivid description of what to do.
-       - "why_this_place": A specific reason why this location was chosen (e.g., "Famous for X", "Fits the quiet vibe").
-       - "reservation": Booking requirements (e.g., "No need", "Book 2 weeks ahead").
-       - "items_to_bring": Recommended items (e.g., "Comfortable shoes", "Camera", "Sunscreen").
+       - "why_this_place": A concise reason why this location was chosen.
+       - "reservation": Booking requirements. Returns empty string "" if no reservation is needed (do not say "No need").
+       - "items_to_bring": Recommended items (e.g. camera). Returns empty string "" if nothing special is needed.
        - "theme": A short, catchy theme for the specific day (e.g., "Historical Deep Dive", "Nature & Relaxation").
     ${isCampingTrip ? `
     10. CAMPING & HIKING SPECIAL INSTRUCTIONS (CRITICAL):

@@ -167,6 +167,11 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
     dayIndex: number,
     period: 'morning' | 'afternoon' | 'evening'
   }) => {
+    // Logic to determine if reservation should be shown
+    const showReservation = data.reservation && 
+      data.reservation.trim().length > 1 && 
+      !/no need|none|free|not required|无需|不需要|免费/i.test(data.reservation);
+
     return (
         <div className="relative print:break-inside-avoid mb-6 last:mb-0">
             {/* Timeline Dot */}
@@ -210,29 +215,35 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
             ) : (
                 <div className="bg-slate-50/50 rounded-lg p-3 border border-slate-100">
                     <div className="font-bold text-slate-800 mb-1">{data.activity}</div>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-3">{data.description}</p>
                     
-                    {/* Meta Tags Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div className="text-sm text-slate-600 space-y-2 leading-relaxed">
+                        {/* Main Description */}
+                        <p>{data.description}</p>
+                        
+                        {/* Integrated "Why Here" */}
                         {data.why_this_place && (
-                            <div className="flex items-start gap-1.5 text-indigo-700 bg-indigo-50 p-2 rounded">
-                                <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                                <span><span className="font-semibold">{t.whyHere}:</span> {data.why_this_place}</span>
-                            </div>
+                            <p className="flex gap-2">
+                                <span className="font-semibold text-indigo-600 shrink-0 text-xs uppercase tracking-wide mt-0.5">{t.whyHere}:</span>
+                                <span>{data.why_this_place}</span>
+                            </p>
                         )}
-                        {data.reservation && (
-                            <div className="flex items-start gap-1.5 text-amber-700 bg-amber-50 p-2 rounded">
-                                <Ticket className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                                <span><span className="font-semibold">{t.reservation}:</span> {data.reservation}</span>
-                            </div>
-                        )}
+                        
+                        {/* Integrated "Items to bring" */}
                         {data.items_to_bring && (
-                             <div className="flex items-start gap-1.5 text-emerald-700 bg-emerald-50 p-2 rounded sm:col-span-2">
-                                <Backpack className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                                <span><span className="font-semibold">{t.bring}:</span> {data.items_to_bring}</span>
-                            </div>
+                             <p className="flex gap-2 text-slate-500">
+                                <span className="font-semibold text-emerald-600 shrink-0 text-xs uppercase tracking-wide mt-0.5">{t.bring}:</span>
+                                <span>{data.items_to_bring}</span>
+                            </p>
                         )}
                     </div>
+                    
+                    {/* Conditional Reservation Badge */}
+                    {showReservation && (
+                        <div className="mt-3 inline-flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2 py-1 rounded text-xs border border-amber-100">
+                            <Ticket className="w-3.5 h-3.5" />
+                            <span className="font-medium">{data.reservation}</span>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
