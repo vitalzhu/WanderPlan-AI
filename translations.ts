@@ -38,9 +38,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     curating: "内容精选",
     newTrip: "新旅程",
     bestFor: "适合",
+    
+    // Day Section Headers
     morning: "上午",
     afternoon: "下午",
     evening: "晚上",
+    
     notes: "备注",
     planB: "备选方案",
     accommodation: "住宿建议",
@@ -70,27 +73,14 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     providerLabel: "模型服务商",
     geminiLabel: "Google Gemini (推荐/含搜索)",
     siliconFlowLabel: "硅基流动 (DeepSeek/Qwen)",
-    dailyTheme: "今日主题",
     
-    // New Detailed Fields
-    overview: "行程概述",
-    coreExperience: "核心体验",
-    highlights: "体验亮点",
-    photoTips: "拍摄 / 观赏建议",
-    seasonTips: "时间 / 季节提示",
-    spotName: "景点 / 活动名称",
-    landscapeFeatures: "景观特点",
-    playStyle: "游玩方式",
-    riskTips: "风险 & 不确定性提示",
-    schedule: "行程安排",
-    stayFeatures: "住宿特色",
-    nightTips: "夜间建议",
-    drivingTime: "当日车程",
-    dining: "用餐安排",
-    stayInfo: "住宿信息",
-    physicalRating: "体力消耗等级",
-    gearAdvice: "穿着 / 装备建议",
-    practicalInfo: "实用信息",
+    // New Narrative Fields
+    dailyTheme: "今日主题",
+    warmTips: "温馨提示",
+    driving: "车程",
+    dining: "用餐",
+    stay: "住宿",
+    logistics: "实用信息",
   },
   en: {
     appTitle: "WanderPlan AI",
@@ -128,9 +118,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     curating: "Curating",
     newTrip: "New Trip",
     bestFor: "Best For",
+    
+    // Day Section Headers
     morning: "MORNING",
     afternoon: "AFTERNOON",
     evening: "EVENING",
+    
     notes: "Notes",
     planB: "Plan B",
     accommodation: "Accommodation",
@@ -160,26 +153,13 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     providerLabel: "AI Provider",
     geminiLabel: "Google Gemini (Recommended)",
     siliconFlowLabel: "SiliconFlow (DeepSeek/Qwen)",
-    dailyTheme: "Theme",
     
-    // New Detailed Fields
-    overview: "Overview",
-    coreExperience: "Core Experience",
-    highlights: "Highlights",
-    photoTips: "Photo/Viewing Tips",
-    seasonTips: "Season/Time Tips",
-    spotName: "Spot/Activity",
-    landscapeFeatures: "Landscape",
-    playStyle: "Play Style",
-    riskTips: "Risk/Uncertainty",
-    schedule: "Schedule",
-    stayFeatures: "Accommodation Features",
-    nightTips: "Night Suggestions",
-    drivingTime: "Driving Time",
+    // New Narrative Fields
+    dailyTheme: "Theme",
+    warmTips: "Warm Tips",
+    driving: "Driving",
     dining: "Dining",
-    stayInfo: "Accommodation Info",
-    physicalRating: "Physical Rating",
-    gearAdvice: "Clothing/Gear",
-    practicalInfo: "Practical Info",
+    stay: "Stay",
+    logistics: "Logistics",
   }
 };

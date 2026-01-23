@@ -36,43 +36,20 @@ const generatePrompt = (prefs, language, provider) => {
     - Output the content strictly in ${langName}.
     - IMPORTANT: The JSON keys MUST remain in English. Only the values should be in ${langName}.
 
-    Planning Logic:
-    1. Organize route logically to minimize backtracking.
-    2. Include all stopovers: ${stopovers}.
-    3. Weather: ${isGemini ? "Use Google Search to find real/avg weather." : "Estimate historical weather."}
-    
-    CRITICAL: STRUCTURED DAILY FORMAT
-    For each day, you MUST provide data matching this exact structured template.
-    
-    1. SUMMARY: A one-sentence summary of the route or core experience (Location + Keywords).
-    
-    2. MORNING (Focus: Meeting & Core Experience):
-       - subtitle: A short title (e.g., "Meeting & Core Experience").
-       - overview: Meeting method, departure time, main route explanation.
-       - core_experience: The single most important landscape/activity of the day.
-       - highlights: Why it's worth coming (emotional value/scarcity).
-       - photo_tips: Angles, best time, precautions.
-       - season_tips: Dependency on season, weather, or time.
+    Style & Tone:
+    - Write in a **Travel Blog / Narrative** style (like a Xiaohongshu/Instagram guide).
+    - Do NOT use bullet points for the main content. Use continuous sentences to describe the experience, emotions, and scenery.
+    - Example: "After breakfast, the driver will pick you up... We head south to Zhaosu..."
 
-    3. AFTERNOON (Focus: Nature Exploration / Supplementary):
-       - subtitle: A short title (e.g., "Nature Exploration").
-       - spot_name: Name of the spot/activity.
-       - landscape_features: Description of the landscape.
-       - play_style: Strolling / Photos / Light Hiking / Free Exploration, etc.
-       - risk_tips: Ice, weather, natural formation probability, etc.
-
-    4. EVENING (Focus: Return & Stay):
-       - subtitle: A short title (e.g., "Return & Accommodation").
-       - schedule: Return / Transfer / Check-in details.
-       - accommodation_features: Environment, atmosphere, is it experiential?
-       - night_suggestions: Walk / Rest / No high-intensity activity.
-
-    5. PRACTICAL INFO:
-       - driving_time: Approx driving hours/distance.
-       - dining: Lunch/Dinner arrangements.
-       - accommodation: Hotel name or area.
-       - physical_rating: e.g., "Low", "Medium", "High".
-       - clothing_gear: What to wear/bring.
+    Structure per Day:
+    1. **Morning/Afternoon/Evening**:
+       - 'title': The main location or activity name (e.g. "Zhaosu Wetland Park").
+       - 'content': A vivid narrative paragraph describing what to do, see, and feel. Mention specific photo spots or interactions.
+       - 'tips': "Warm Tips" (温馨提示) - Specific advice about weather, best photo times, ice conditions, or booking requirements. Return empty string if no specific tip.
+    2. **Logistics**:
+       - 'driving': Km and time (e.g. "270KM, approx 4h").
+       - 'dining': Breakfast/Lunch/Dinner arrangement (e.g. "Hotel breakfast, Roadside local food for lunch").
+       - 'accommodation': Specific hotel name or area suggestion.
 
     OUTPUT FORMAT:
     Return a valid JSON object matching this schema:
@@ -95,34 +72,25 @@ const generatePrompt = (prefs, language, provider) => {
           "day": number,
           "city": "string",
           "theme": "string",
-          "summary": "string",
           "morning": {
-            "subtitle": "string",
-            "overview": "string",
-            "core_experience": "string",
-            "highlights": "string",
-            "photo_tips": "string",
-            "season_tips": "string"
+            "title": "string",
+            "content": "string",
+            "tips": "string"
           },
           "afternoon": {
-            "subtitle": "string",
-            "spot_name": "string",
-            "landscape_features": "string",
-            "play_style": "string",
-            "risk_tips": "string"
+            "title": "string",
+            "content": "string",
+            "tips": "string"
           },
           "evening": {
-            "subtitle": "string",
-            "schedule": "string",
-            "accommodation_features": "string",
-            "night_suggestions": "string"
+            "title": "string",
+            "content": "string",
+            "tips": "string"
           },
-          "practical_info": {
-            "driving_time": "string",
+          "logistics": {
+            "driving": "string",
             "dining": "string",
-            "accommodation": "string",
-            "physical_rating": "string",
-            "clothing_gear": "string"
+            "accommodation": "string"
           }
         }
       ],

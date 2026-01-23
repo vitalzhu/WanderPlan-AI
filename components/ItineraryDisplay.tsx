@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { TravelPlan, Language, DayPlan, MorningBlock, AfternoonBlock, EveningBlock, PracticalInfo } from '../types';
+import { TravelPlan, Language, TimeBlock, LogisticsBlock } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sunset, Sun, Star, Navigation } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
@@ -46,7 +46,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
   };
 
   // Generic handler for nested fields
-  const handleNestedChange = (dayIndex: number, section: 'morning' | 'afternoon' | 'evening' | 'practical_info', field: string, value: string) => {
+  const handleNestedChange = (dayIndex: number, section: 'morning' | 'afternoon' | 'evening' | 'logistics', field: string, value: string) => {
       const newDailyPlan = [...editedPlan.daily_plan];
       const sectionData = newDailyPlan[dayIndex][section] as any;
       newDailyPlan[dayIndex] = {
@@ -60,7 +60,6 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
   };
 
   const generateTextContent = () => {
-      // Simplified text generation for clipboard
       return JSON.stringify(plan, null, 2); 
   };
 
@@ -94,36 +93,80 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
 
   const currentPlan = isEditing ? editedPlan : plan;
 
-  // Helper component for label-value pairs
-  const InfoRow = ({ label, value, isEd, onChange, multiline = false }: { label: string, value: string, isEd: boolean, onChange?: (v: string) => void, multiline?: boolean }) => {
-    if (isEd && onChange) {
-        return (
-            <div className="mb-2">
-                <span className="text-xs font-bold text-slate-500 block mb-1">{label}</span>
-                {multiline ? (
-                    <textarea 
-                        value={value} 
-                        onChange={(e) => onChange(e.target.value)}
-                        className="w-full p-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
-                    />
-                ) : (
-                    <input 
-                        type="text" 
-                        value={value} 
-                        onChange={(e) => onChange(e.target.value)}
-                        className="w-full p-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
-                    />
-                )}
-            </div>
-        );
-    }
-    if (!value) return null;
-    return (
-        <li className="flex flex-col sm:flex-row sm:gap-2 items-start text-sm text-slate-700 mb-2 leading-relaxed">
-            <span className="font-bold shrink-0 text-slate-900 min-w-[5rem]">• {label}：</span>
-            <span>{value}</span>
-        </li>
-    );
+  // Render a Time Block (Morning/Afternoon/Evening)
+  const RenderTimeBlock = ({ 
+      title, 
+      data, 
+      icon: Icon, 
+      themeColor, 
+      dayIndex, 
+      section 
+  }: { 
+      title: string, 
+      data: TimeBlock, 
+      icon: any, 
+      themeColor: string, 
+      dayIndex: number, 
+      section: 'morning' | 'afternoon' | 'evening' 
+  }) => {
+      // Determine colors based on themeColor prop
+      const bgClass = themeColor === 'amber' ? 'bg-amber-50 border-amber-100' : themeColor === 'sky' ? 'bg-sky-50 border-sky-100' : 'bg-indigo-50 border-indigo-100';
+      const textClass = themeColor === 'amber' ? 'text-amber-700' : themeColor === 'sky' ? 'text-sky-700' : 'text-indigo-700';
+      const iconBgClass = themeColor === 'amber' ? 'bg-amber-100' : themeColor === 'sky' ? 'bg-sky-100' : 'bg-indigo-100';
+
+      return (
+          <div className={`p-4 rounded-xl border ${bgClass} relative`}>
+              <div className="flex items-start gap-3 mb-2">
+                  <div className={`p-1.5 rounded-lg shrink-0 ${iconBgClass} ${textClass}`}>
+                      <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                      <div className={`text-xs font-bold uppercase tracking-wider mb-0.5 ${textClass}`}>{title}</div>
+                      {isEditing ? (
+                          <input 
+                            value={data.title}
+                            onChange={(e) => handleNestedChange(dayIndex, section, 'title', e.target.value)}
+                            className="w-full text-base font-bold bg-white/50 border border-black/10 rounded px-2 py-1 mb-2"
+                          />
+                      ) : (
+                          <h4 className="text-base font-bold text-slate-900">{data.title}</h4>
+                      )}
+                  </div>
+              </div>
+              
+              <div className="pl-10">
+                  {isEditing ? (
+                      <textarea 
+                        value={data.content}
+                        onChange={(e) => handleNestedChange(dayIndex, section, 'content', e.target.value)}
+                        className="w-full text-sm text-slate-700 leading-relaxed bg-white/50 border border-black/10 rounded p-2 min-h-[80px]"
+                      />
+                  ) : (
+                      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.content}</p>
+                  )}
+
+                  {/* Tips Section */}
+                  {(data.tips || isEditing) && (
+                      <div className="mt-3 bg-white/60 rounded-lg p-3 border border-black/5 flex gap-2">
+                          <Lightbulb className={`w-4 h-4 shrink-0 mt-0.5 ${textClass}`} />
+                          <div className="flex-1">
+                              <span className={`text-xs font-bold block mb-1 ${textClass}`}>{t.warmTips}:</span>
+                              {isEditing ? (
+                                  <textarea 
+                                    value={data.tips}
+                                    onChange={(e) => handleNestedChange(dayIndex, section, 'tips', e.target.value)}
+                                    className="w-full text-xs bg-transparent border-b border-black/10 outline-none"
+                                    placeholder="Add tips here..."
+                                  />
+                              ) : (
+                                  <p className="text-xs text-slate-600">{data.tips}</p>
+                              )}
+                          </div>
+                      </div>
+                  )}
+              </div>
+          </div>
+      );
   };
 
   return (
@@ -163,7 +206,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
         </div>
       </div>
 
-      {/* Daily Timeline - THE NEW STRUCTURE */}
+      {/* Daily Timeline */}
       <div className="space-y-6">
         {currentPlan.daily_plan.map((day, index) => {
           const isOpen = expandedDay === 'ALL' || expandedDay === day.day;
@@ -173,16 +216,17 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
               {/* Header */}
               <button 
                 onClick={() => toggleDay(day.day)}
-                className="w-full p-5 hover:bg-slate-50 transition-colors text-left no-print border-b border-slate-100"
+                className="w-full p-0 transition-colors text-left no-print block"
               >
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="flex items-center gap-2 text-indigo-600 font-bold text-lg">
-                            <span className="bg-indigo-100 px-2 py-0.5 rounded text-sm">Day {day.day}</span>
-                            <span>{day.theme}</span>
+                <div className={`p-5 flex items-center justify-between border-b ${isOpen ? 'border-slate-100 bg-slate-50' : 'border-transparent bg-white hover:bg-slate-50'}`}>
+                    <div className="flex items-center gap-4">
+                        <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl border shadow-sm ${isOpen ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-700'}`}>
+                             <span className="text-[10px] font-bold uppercase opacity-80">Day</span>
+                             <span className="text-2xl font-extrabold leading-none">{day.day}</span>
                         </div>
-                        <div className="text-slate-500 text-sm mt-1 italic pl-1">
-                            {day.summary}
+                        <div>
+                            <div className="font-bold text-lg text-slate-900">{day.city}</div>
+                            <div className="text-sm text-slate-500 font-medium">{day.theme}</div>
                         </div>
                     </div>
                     {isOpen ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
@@ -192,77 +236,80 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
               {/* Print Header */}
               <div className="hidden print:block p-5 border-b border-slate-200">
                  <h3 className="text-xl font-bold text-slate-900">Day {day.day} | {day.theme}</h3>
-                 <p className="text-slate-600 italic mt-1">{day.summary}</p>
               </div>
 
               {isOpen && (
-                <div className="p-6 pt-2 space-y-6">
-                    
-                    {/* Morning Section */}
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <h4 className="font-bold text-base text-slate-900 bg-slate-100 px-3 py-1 rounded-full inline-flex items-center gap-2 border border-slate-200">
-                                🕘 {t.morning} ｜ {day.morning.subtitle}
-                            </h4>
-                        </div>
-                        <hr className="border-t border-slate-200 my-4 border-dashed" />
-                        <ul className="pl-2">
-                            <InfoRow label={t.overview} value={day.morning.overview} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'morning', 'overview', v)} multiline />
-                            <InfoRow label={t.coreExperience} value={day.morning.core_experience} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'morning', 'core_experience', v)} />
-                            <InfoRow label={t.highlights} value={day.morning.highlights} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'morning', 'highlights', v)} multiline />
-                            <InfoRow label={t.photoTips} value={day.morning.photo_tips} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'morning', 'photo_tips', v)} />
-                            <InfoRow label={t.seasonTips} value={day.morning.season_tips} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'morning', 'season_tips', v)} />
-                        </ul>
-                    </div>
+                <div className="p-5 pt-5 space-y-6">
+                    {/* Morning (Amber) */}
+                    <RenderTimeBlock 
+                        title={t.morning} 
+                        data={day.morning} 
+                        icon={Sun} 
+                        themeColor="amber" 
+                        dayIndex={index} 
+                        section="morning" 
+                    />
 
-                    {/* Afternoon Section */}
-                    <div>
-                         <div className="flex items-center gap-2 mb-4 mt-8">
-                            <h4 className="font-bold text-base text-slate-900 bg-slate-100 px-3 py-1 rounded-full inline-flex items-center gap-2 border border-slate-200">
-                                🕐 {t.afternoon} ｜ {day.afternoon.subtitle}
-                            </h4>
-                        </div>
-                        <hr className="border-t border-slate-200 my-4 border-dashed" />
-                        <ul className="pl-2">
-                            <InfoRow label={t.spotName} value={day.afternoon.spot_name} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'afternoon', 'spot_name', v)} />
-                            <InfoRow label={t.landscapeFeatures} value={day.afternoon.landscape_features} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'afternoon', 'landscape_features', v)} />
-                            <InfoRow label={t.playStyle} value={day.afternoon.play_style} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'afternoon', 'play_style', v)} />
-                            <InfoRow label={t.riskTips} value={day.afternoon.risk_tips} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'afternoon', 'risk_tips', v)} />
-                        </ul>
-                    </div>
+                    {/* Afternoon (Sky) */}
+                    <RenderTimeBlock 
+                        title={t.afternoon} 
+                        data={day.afternoon} 
+                        icon={CloudSun} 
+                        themeColor="sky" 
+                        dayIndex={index} 
+                        section="afternoon" 
+                    />
 
-                    {/* Evening Section */}
-                    <div>
-                         <div className="flex items-center gap-2 mb-4 mt-8">
-                            <h4 className="font-bold text-base text-slate-900 bg-slate-100 px-3 py-1 rounded-full inline-flex items-center gap-2 border border-slate-200">
-                                🌙 {t.evening} ｜ {day.evening.subtitle}
-                            </h4>
-                        </div>
-                        <hr className="border-t border-slate-200 my-4 border-dashed" />
-                        <ul className="pl-2">
-                            <InfoRow label={t.schedule} value={day.evening.schedule} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'evening', 'schedule', v)} multiline />
-                            <InfoRow label={t.stayFeatures} value={day.evening.accommodation_features} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'evening', 'accommodation_features', v)} />
-                            <InfoRow label={t.nightTips} value={day.evening.night_suggestions} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'evening', 'night_suggestions', v)} />
-                        </ul>
-                    </div>
+                    {/* Evening (Indigo) */}
+                    <RenderTimeBlock 
+                        title={t.evening} 
+                        data={day.evening} 
+                        icon={Moon} 
+                        themeColor="indigo" 
+                        dayIndex={index} 
+                        section="evening" 
+                    />
 
-                    {/* Practical Info Section */}
-                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 mt-8">
-                        <div className="flex items-center gap-2 mb-4">
-                            <h4 className="font-bold text-sm text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                                📌 {t.practicalInfo}
-                            </h4>
+                    {/* Logistics Footer */}
+                    <div className="bg-slate-800 rounded-xl p-4 text-slate-300 text-sm mt-4 shadow-lg">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1">
+                            <Info className="w-3.5 h-3.5" /> {t.logistics}
                         </div>
-                        <hr className="border-t border-slate-200 my-4 border-dashed" />
-                        <ul className="pl-2 grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                            <InfoRow label={t.drivingTime} value={day.practical_info.driving_time} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'practical_info', 'driving_time', v)} />
-                            <InfoRow label={t.dining} value={day.practical_info.dining} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'practical_info', 'dining', v)} />
-                            <InfoRow label={t.stayInfo} value={day.practical_info.accommodation} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'practical_info', 'accommodation', v)} />
-                            <InfoRow label={t.physicalRating} value={day.practical_info.physical_rating} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'practical_info', 'physical_rating', v)} />
-                            <div className="md:col-span-2">
-                                <InfoRow label={t.gearAdvice} value={day.practical_info.clothing_gear} isEd={isEditing} onChange={(v) => handleNestedChange(index, 'practical_info', 'clothing_gear', v)} />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="flex items-start gap-2">
+                                <Car className="w-4 h-4 mt-0.5 text-slate-400" />
+                                <div>
+                                    <span className="block font-bold text-white text-xs mb-0.5">{t.driving}</span>
+                                    {isEditing ? (
+                                        <input value={day.logistics.driving} onChange={e => handleNestedChange(index, 'logistics', 'driving', e.target.value)} className="bg-transparent border-b border-slate-600 w-full text-xs" />
+                                    ) : (
+                                        <span>{day.logistics.driving}</span>
+                                    )}
+                                </div>
                             </div>
-                        </ul>
+                             <div className="flex items-start gap-2">
+                                <Utensils className="w-4 h-4 mt-0.5 text-slate-400" />
+                                <div>
+                                    <span className="block font-bold text-white text-xs mb-0.5">{t.dining}</span>
+                                    {isEditing ? (
+                                        <input value={day.logistics.dining} onChange={e => handleNestedChange(index, 'logistics', 'dining', e.target.value)} className="bg-transparent border-b border-slate-600 w-full text-xs" />
+                                    ) : (
+                                        <span>{day.logistics.dining}</span>
+                                    )}
+                                </div>
+                            </div>
+                             <div className="flex items-start gap-2">
+                                <BedDouble className="w-4 h-4 mt-0.5 text-slate-400" />
+                                <div>
+                                    <span className="block font-bold text-white text-xs mb-0.5">{t.stay}</span>
+                                    {isEditing ? (
+                                        <input value={day.logistics.accommodation} onChange={e => handleNestedChange(index, 'logistics', 'accommodation', e.target.value)} className="bg-transparent border-b border-slate-600 w-full text-xs" />
+                                    ) : (
+                                        <span>{day.logistics.accommodation}</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
               )}
