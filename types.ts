@@ -58,6 +58,18 @@ export interface WeatherInfo {
   clothing_advice: string;
 }
 
+export interface TravelConsiderations {
+  documents: string;       // ID card, Passport, Border permit
+  culture_customs: string; // Local taboos, etiquette
+  health_safety: string;   // Altitude sickness, water safety, etc.
+  laws_regulations: string; // Drone laws, driving rules
+}
+
+export interface SouvenirsInfo {
+  items: string[];
+  final_wishes: string;
+}
+
 export interface SearchSource {
   title: string;
   url: string;
@@ -67,6 +79,8 @@ export interface TravelPlan {
   overview: TripOverview;
   weather_info: WeatherInfo;
   daily_plan: DayPlan[];
+  considerations: TravelConsiderations;
+  souvenirs: SouvenirsInfo;
   must_book_in_advance: string[];
   accommodation_tips: string;
   transport_tips: string;

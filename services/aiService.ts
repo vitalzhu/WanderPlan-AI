@@ -1,5 +1,6 @@
 
-import { TravelPreferences, TravelPlan, Language, SearchSource, TimeBlock, LogisticsBlock } from "../types";
+
+import { TravelPreferences, TravelPlan, Language, SearchSource, TimeBlock, LogisticsBlock, TravelConsiderations, SouvenirsInfo } from "../types";
 
 // Helper to sanitize the response string into a clean JSON object
 const sanitizeString = (val: unknown): string => {
@@ -30,6 +31,18 @@ const sanitizeLogistics = (val: any): LogisticsBlock => ({
     accommodation: sanitizeString(val?.accommodation),
 });
 
+const sanitizeConsiderations = (val: any): TravelConsiderations => ({
+    documents: sanitizeString(val?.documents),
+    culture_customs: sanitizeString(val?.culture_customs),
+    health_safety: sanitizeString(val?.health_safety),
+    laws_regulations: sanitizeString(val?.laws_regulations),
+});
+
+const sanitizeSouvenirs = (val: any): SouvenirsInfo => ({
+    items: sanitizeArray(val?.items),
+    final_wishes: sanitizeString(val?.final_wishes),
+});
+
 const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: SearchSource[]): TravelPlan => {
     const result: TravelPlan = {
         overview: {
@@ -54,6 +67,8 @@ const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: S
             evening: sanitizeTimeBlock(day.evening),
             logistics: sanitizeLogistics(day.logistics),
         })),
+        considerations: sanitizeConsiderations(rawJson.considerations),
+        souvenirs: sanitizeSouvenirs(rawJson.souvenirs),
         must_book_in_advance: sanitizeArray(rawJson.must_book_in_advance),
         accommodation_tips: sanitizeString(rawJson.accommodation_tips),
         transport_tips: sanitizeString(rawJson.transport_tips),

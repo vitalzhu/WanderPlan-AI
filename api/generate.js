@@ -45,6 +45,7 @@ const generatePrompt = (prefs, language, provider) => {
     1. **Route Planning**: Organize the route logically to minimize backtracking and include all stopovers (${stopovers}).
     2. **Weather Search**: ${isGemini ? `Use Google Search to find the specific weather forecast (if close to ${currentDate}) or historical weather averages for ${prefs.destination} during ${prefs.startDate} to ${prefs.endDate}.` : "Estimate historical weather for the dates."}
        - Based on the weather, provide specific temperature ranges and clothing/footwear advice.
+    3. **Travel Info Search**: Find requirements for documents (ID/Visa/Permits), local customs/taboos, health risks (like altitude), laws, and famous local souvenirs for ${prefs.destination}.
 
     Structure per Day:
     1. **Morning/Afternoon/Evening**:
@@ -99,6 +100,16 @@ const generatePrompt = (prefs, language, provider) => {
           }
         }
       ],
+      "considerations": {
+        "documents": "Required IDs, Visas, or Border Permits.",
+        "culture_customs": "Local taboos, etiquette, or cultural norms.",
+        "health_safety": "Altitude sickness, vaccinations, safety tips.",
+        "laws_regulations": "Drone rules, driving regulations, or other laws."
+      },
+      "souvenirs": {
+        "items": ["List of 3-5 specific local specialties"],
+        "final_wishes": "A warm closing sentence blessing the traveler."
+      },
       "must_book_in_advance": ["string"],
       "accommodation_tips": "string",
       "transport_tips": "string",

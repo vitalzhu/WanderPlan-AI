@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { TravelPlan, Language, TimeBlock, LogisticsBlock, WeatherInfo } from '../types';
+import { TravelPlan, Language, TimeBlock, LogisticsBlock, WeatherInfo, TravelConsiderations, SouvenirsInfo } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
@@ -64,6 +64,26 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
           ...editedPlan,
           weather_info: {
               ...editedPlan.weather_info,
+              [field]: value
+          }
+      });
+  };
+
+  const handleConsiderationChange = (field: keyof TravelConsiderations, value: string) => {
+      setEditedPlan({
+          ...editedPlan,
+          considerations: {
+              ...editedPlan.considerations,
+              [field]: value
+          }
+      });
+  };
+
+   const handleSouvenirChange = (field: 'final_wishes' | 'items', value: string | string[]) => {
+      setEditedPlan({
+          ...editedPlan,
+          souvenirs: {
+              ...editedPlan.souvenirs,
               [field]: value
           }
       });
@@ -238,7 +258,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
         </div>
       </div>
 
-      {/* Weather Card (New Design) */}
+      {/* Weather Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 transition-all hover:shadow-md">
         <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-sky-100 text-sky-600 rounded-lg">
@@ -305,7 +325,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
         </div>
       </div>
 
-      {/* Daily Timeline - Cohesive Card Design */}
+      {/* Daily Timeline */}
       <div className="space-y-6">
         {currentPlan.daily_plan.map((day, index) => {
           const isOpen = expandedDay === 'ALL' || expandedDay === day.day;
@@ -443,6 +463,125 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
           );
         })}
       </div>
+
+      {/* Combined Trip Essentials & Memories Card */}
+      {(currentPlan.considerations || currentPlan.souvenirs) && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden no-print transition-all hover:shadow-md">
+            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-4 text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-yellow-300" />
+                <h3 className="font-bold text-lg tracking-tight">{t.tripEssentialsTitle}</h3>
+            </div>
+            
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left: Special Attention / Considerations */}
+                {currentPlan.considerations && (
+                    <div className="space-y-4">
+                        <h4 className="flex items-center gap-2 font-bold text-slate-800 border-b border-slate-100 pb-2">
+                            <Shield className="w-4 h-4 text-rose-500" />
+                            {t.attention}
+                        </h4>
+                        
+                        <div className="space-y-4">
+                            {/* Documents */}
+                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                                    <FileText className="w-3 h-3" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">{t.documents}</span>
+                                </div>
+                                {isEditing ? (
+                                    <textarea value={currentPlan.considerations.documents} onChange={e => handleConsiderationChange('documents', e.target.value)} className="w-full bg-white border border-slate-200 rounded p-1 text-sm outline-none" rows={2} />
+                                ) : (
+                                    <p className="text-sm text-slate-700 leading-relaxed">{currentPlan.considerations.documents}</p>
+                                )}
+                            </div>
+                            
+                            {/* Others combined slightly to save space or just listed */}
+                             {/* Culture */}
+                             <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                                    <Users className="w-3 h-3" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">{t.cultureCustoms}</span>
+                                </div>
+                                {isEditing ? (
+                                    <textarea value={currentPlan.considerations.culture_customs} onChange={e => handleConsiderationChange('culture_customs', e.target.value)} className="w-full bg-white border border-slate-200 rounded p-1 text-sm outline-none" rows={2} />
+                                ) : (
+                                    <p className="text-sm text-slate-700 leading-relaxed">{currentPlan.considerations.culture_customs}</p>
+                                )}
+                            </div>
+
+                             {/* Health & Safety */}
+                             <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                                    <FileWarning className="w-3 h-3" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">{t.healthSafety}</span>
+                                </div>
+                                {isEditing ? (
+                                    <textarea value={currentPlan.considerations.health_safety} onChange={e => handleConsiderationChange('health_safety', e.target.value)} className="w-full bg-white border border-slate-200 rounded p-1 text-sm outline-none" rows={2} />
+                                ) : (
+                                    <p className="text-sm text-slate-700 leading-relaxed">{currentPlan.considerations.health_safety}</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Right: Souvenirs & Wishes */}
+                {currentPlan.souvenirs && (
+                    <div className="flex flex-col h-full">
+                        <div className="space-y-4 flex-1">
+                            <h4 className="flex items-center gap-2 font-bold text-slate-800 border-b border-slate-100 pb-2">
+                                <Gift className="w-4 h-4 text-purple-500" />
+                                {t.souvenirsTitle}
+                            </h4>
+
+                            <div>
+                                <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{t.specialties}</h5>
+                                <div className="flex flex-wrap gap-2">
+                                    {currentPlan.souvenirs.items.map((item, idx) => (
+                                        <span key={idx} className="bg-purple-50 text-purple-900 px-3 py-1.5 rounded-full text-sm font-medium border border-purple-100 flex items-center gap-1.5">
+                                            <Star className="w-3 h-3 text-purple-400 fill-purple-400" />
+                                            {isEditing ? (
+                                                <input 
+                                                    value={item} 
+                                                    onChange={(e) => {
+                                                        const newItems = [...currentPlan.souvenirs.items];
+                                                        newItems[idx] = e.target.value;
+                                                        handleSouvenirChange('items', newItems);
+                                                    }}
+                                                    className="bg-transparent outline-none w-24 min-w-0"
+                                                />
+                                            ) : item}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Wishes at the bottom of the right column */}
+                        <div className="mt-8 pt-6 border-t border-slate-100">
+                            <h4 className="flex items-center gap-2 font-bold text-slate-800 mb-3">
+                                <Heart className="w-4 h-4 text-pink-500" />
+                                {t.bestWishes}
+                            </h4>
+                             <div className="relative">
+                                <span className="absolute -top-2 -left-2 text-4xl text-slate-200 font-serif leading-none">"</span>
+                                {isEditing ? (
+                                    <textarea 
+                                        value={currentPlan.souvenirs.final_wishes} 
+                                        onChange={(e) => handleSouvenirChange('final_wishes', e.target.value)}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded p-3 text-lg italic font-serif text-slate-600 outline-none"
+                                        rows={3}
+                                    />
+                                ) : (
+                                    <p className="text-lg italic font-serif text-slate-600 leading-relaxed pl-4">{currentPlan.souvenirs.final_wishes}</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+      )}
 
       {/* Sources */}
       {currentPlan.search_sources && currentPlan.search_sources.length > 0 && (

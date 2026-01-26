@@ -81,6 +81,17 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     dining: "用餐",
     stay: "住宿",
     logistics: "实用信息",
+
+    // Trip Essentials
+    tripEssentialsTitle: "旅行锦囊 & 纪念",
+    attention: "特别注意",
+    documents: "证件要求",
+    cultureCustoms: "风土人情",
+    healthSafety: "健康与安全",
+    lawsRegulations: "法律法规",
+    souvenirsTitle: "特产与纪念",
+    specialties: "推荐特产",
+    bestWishes: "旅途寄语"
   },
   en: {
     appTitle: "WanderPlan AI",
@@ -161,5 +172,16 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     dining: "Dining",
     stay: "Stay",
     logistics: "Logistics",
+
+    // Trip Essentials
+    tripEssentialsTitle: "Trip Essentials & Memories",
+    attention: "Special Attention",
+    documents: "Documents",
+    cultureCustoms: "Culture & Customs",
+    healthSafety: "Health & Safety",
+    lawsRegulations: "Laws & Regulations",
+    souvenirsTitle: "Souvenirs",
+    specialties: "Local Specialties",
+    bestWishes: "Best Wishes"
   }
 };
