@@ -432,20 +432,16 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
       {/* Combined Trip Essentials & Memories Card */}
       {(currentPlan.considerations || currentPlan.souvenirs) && (
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden no-print transition-all hover:shadow-md ring-1 ring-slate-100/50">
-            <div className="relative bg-gradient-to-br from-violet-50/80 via-white to-rose-50/80 p-6 sm:p-8 overflow-hidden border-b border-slate-100/50">
-                {/* Decorative Gradients */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-200/40 rounded-full filter blur-[60px] mix-blend-multiply translate-x-1/3 -translate-y-1/3"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-200/40 rounded-full filter blur-[60px] mix-blend-multiply -translate-x-1/3 translate-y-1/3"></div>
-                
-                <div className="relative z-10 flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-xl shadow-sm ring-1 ring-slate-100 text-violet-600">
+            <div className="p-6 sm:p-8 pb-2">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-violet-50 text-violet-600 rounded-xl">
                         <Sparkles className="w-5 h-5" />
                     </div>
-                    <h3 className="font-bold text-xl text-slate-800 tracking-tight">{t.tripEssentialsTitle}</h3>
+                    <h3 className="text-lg font-bold text-slate-800">{t.tripEssentialsTitle}</h3>
                 </div>
             </div>
             
-            <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 bg-white">
+            <div className="p-6 sm:p-8 pt-4 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                 {/* Left Column: Considerations */}
                 {currentPlan.considerations && (
                     <div className="space-y-6">
