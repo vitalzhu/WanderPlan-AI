@@ -273,16 +273,16 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
             <h3 className="text-lg font-bold text-slate-800">{t.weatherTitle}</h3>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-4">
             {/* Metrics */}
-            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
                     { icon: Thermometer, label: t.temperature, value: currentPlan.weather_info.temperature_range, key: 'temperature_range', color: 'text-orange-500', bg: 'bg-orange-50' },
                     { icon: CloudSun, label: t.weatherCondition, value: currentPlan.weather_info.weather_condition, key: 'weather_condition', color: 'text-sky-500', bg: 'bg-sky-50' },
                     { icon: Droplets, label: t.humidity, value: currentPlan.weather_info.humidity, key: 'humidity', color: 'text-blue-500', bg: 'bg-blue-50' }
                 ].map((item, i) => (
-                    <div key={i} className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between h-full">
-                        <div className="flex items-center gap-2 mb-3 text-slate-400">
+                    <div key={i} className={`bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-center gap-1.5 ${i === 2 ? 'col-span-2 md:col-span-1' : ''}`}>
+                        <div className="flex items-center gap-2 text-slate-400">
                             <item.icon className={`w-4 h-4 ${item.color}`} />
                             <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
                         </div>
@@ -296,7 +296,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
             </div>
 
             {/* Clothing Advice */}
-            <div className="bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100/50 flex flex-col justify-center">
+            <div className="bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100/50">
                  <div className="flex items-center gap-2 mb-2 text-indigo-500">
                     <Shirt className="w-4 h-4" />
                     <span className="text-[10px] font-bold uppercase tracking-wider">{t.clothing}</span>
