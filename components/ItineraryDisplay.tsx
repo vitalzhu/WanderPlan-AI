@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { TravelPlan, Language, TimeBlock, LogisticsBlock, WeatherInfo, TravelConsiderations, SouvenirsInfo } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles, MessageSquare, Send, ThumbsUp } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
@@ -17,11 +17,20 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
   const [isEditing, setIsEditing] = useState(false);
   const [editedPlan, setEditedPlan] = useState<TravelPlan>(initialPlan);
   const [copied, setCopied] = useState(false);
+  
+  // Feedback State
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  
   const t = TRANSLATIONS[language];
 
   useEffect(() => {
     setPlan(initialPlan);
     setEditedPlan(initialPlan);
+    setFeedbackSubmitted(false);
+    setRating(0);
+    setFeedback('');
   }, [initialPlan]);
 
   const toggleDay = (day: number) => {
@@ -43,6 +52,12 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
     setPlan(editedPlan);
     setIsEditing(false);
     setExpandedDay(1);
+  };
+
+  const handleFeedbackSubmit = () => {
+      // In a real app, send to backend here
+      console.log('Feedback submitted:', { rating, feedback });
+      setFeedbackSubmitted(true);
   };
 
   // Generic handler for nested fields
@@ -547,6 +562,53 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
             </div>
           </div>
       )}
+      
+      {/* Feedback Mechanism */}
+      <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 mt-8 text-center no-print">
+        {!feedbackSubmitted ? (
+            <>
+                <h3 className="text-lg font-bold text-slate-800 mb-2">{t.feedbackTitle}</h3>
+                <p className="text-sm text-slate-500 mb-6">{t.feedbackSubtitle}</p>
+                
+                <div className="flex justify-center gap-2 mb-6">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <button 
+                            key={star} 
+                            onClick={() => setRating(star)}
+                            className="p-1 transition-transform hover:scale-110 focus:outline-none"
+                        >
+                            <Star 
+                                className={`w-8 h-8 ${star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} 
+                            />
+                        </button>
+                    ))}
+                </div>
+
+                <div className="relative max-w-md mx-auto">
+                    <textarea
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
+                        placeholder={t.feedbackPlaceholder}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-4 pr-12 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-24"
+                    />
+                    <button 
+                        onClick={handleFeedbackSubmit}
+                        disabled={rating === 0}
+                        className={`absolute bottom-3 right-3 p-2 rounded-lg transition-colors ${rating > 0 ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                    >
+                        <Send className="w-4 h-4" />
+                    </button>
+                </div>
+            </>
+        ) : (
+            <div className="py-8 animate-fade-in">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ThumbsUp className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800">{t.feedbackThanks}</h3>
+            </div>
+        )}
+      </div>
 
       {/* Action Bar */}
       {!isEditing && (

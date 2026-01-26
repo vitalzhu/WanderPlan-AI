@@ -91,7 +91,14 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lawsRegulations: "法律法规",
     souvenirsTitle: "特产与纪念",
     specialties: "推荐特产",
-    bestWishes: "旅途寄语"
+    bestWishes: "旅途寄语",
+
+    // Feedback
+    feedbackTitle: "评价生成结果",
+    feedbackSubtitle: "您的反馈将帮助我们改进 AI 模型",
+    feedbackPlaceholder: "有什么建议或反馈吗？",
+    submitFeedback: "提交",
+    feedbackThanks: "感谢您的反馈！",
   },
   en: {
     appTitle: "WanderPlan AI",
@@ -182,6 +189,13 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lawsRegulations: "Laws & Regulations",
     souvenirsTitle: "Souvenirs",
     specialties: "Local Specialties",
-    bestWishes: "Best Wishes"
+    bestWishes: "Best Wishes",
+
+    // Feedback
+    feedbackTitle: "Rate this Plan",
+    feedbackSubtitle: "Your feedback helps us improve the AI",
+    feedbackPlaceholder: "Any suggestions for improvement?",
+    submitFeedback: "Submit",
+    feedbackThanks: "Thanks for your feedback!",
   }
 };
