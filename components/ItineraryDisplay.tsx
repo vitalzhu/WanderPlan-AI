@@ -188,12 +188,12 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
               </div>
               
               {/* Main Content */}
-              <div className="text-sm text-slate-600 leading-7 space-y-4">
+              <div className="text-[15px] sm:text-base text-slate-700 leading-relaxed space-y-4">
                   {isEditing ? (
                       <textarea 
                         value={data.content}
                         onChange={(e) => handleNestedChange(dayIndex, section, 'content', e.target.value)}
-                        className="w-full min-h-[120px] p-3 bg-slate-50 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-100 outline-none"
+                        className="w-full min-h-[160px] p-4 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-100 outline-none resize-y"
                       />
                   ) : (
                       <p className="whitespace-pre-wrap">{data.content}</p>
@@ -201,7 +201,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
 
                   {/* Tips Box */}
                   {(data.tips || isEditing) && (
-                      <div className="bg-amber-50/60 rounded-xl p-4 border border-amber-100 flex gap-3 text-amber-900/80">
+                      <div className="bg-amber-50/60 rounded-xl p-4 border border-amber-100 flex gap-3 text-amber-900/80 mt-4">
                           <Lightbulb className="w-4 h-4 shrink-0 text-amber-500 mt-0.5 fill-amber-100" />
                           <div className="flex-1">
                               <span className="text-xs font-bold text-amber-600 uppercase tracking-wide block mb-1">{t.warmTips}</span>

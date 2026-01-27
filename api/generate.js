@@ -38,8 +38,9 @@ const generatePrompt = (prefs, language, provider) => {
 
     Style & Tone:
     - Write in a **Travel Blog / Narrative** style (like a Xiaohongshu/Instagram guide).
-    - Do NOT use bullet points for the main content. Use continuous sentences to describe the experience, emotions, and scenery.
-    - Example: "After breakfast, the driver will pick you up... We head south to Zhaosu..."
+    - Do NOT use bullet points for the main content. Use continuous, engaging sentences to describe the experience, emotions, and scenery.
+    - Focus on **sensory details**: what to see, hear, smell, and feel.
+    - Example: "The morning light hits the golden peaks... You can feel the cool breeze..."
 
     CRITICAL TASKS:
     1. **Route Planning**: Organize the route logically to minimize backtracking and include all stopovers (${stopovers}).
@@ -50,7 +51,7 @@ const generatePrompt = (prefs, language, provider) => {
     Structure per Day:
     1. **Morning/Afternoon/Evening**:
        - 'title': The main location or activity name (e.g. "Zhaosu Wetland Park").
-       - 'content': A vivid narrative paragraph describing what to do, see, and feel. Mention specific photo spots or interactions.
+       - 'content': A detailed, immersive narrative paragraph (approx 80-120 words). Describe the atmosphere, specific sights, sounds, and emotions. Explain exactly what to do and how to enjoy the moment. Avoid generic summaries.
        - 'tips': "Warm Tips" (温馨提示) - Specific advice about weather, best photo times, ice conditions, or booking requirements. Return empty string if no specific tip.
     2. **Logistics**:
        - 'driving': Km and time (e.g. "270KM, approx 4h").
