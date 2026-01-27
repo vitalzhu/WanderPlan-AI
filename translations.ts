@@ -100,7 +100,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     submitFeedback: "提交评价",
     feedbackThanks: "感谢您的反馈！",
     regenerateOption: "重新生成行程",
-    regenerateDesc: "对结果不满意？基于上方反馈重新生成。",
+    regenerateDesc: "我们将根据您的反馈为您优化并重新生成行程。",
   },
   en: {
     appTitle: "WanderPlan AI",
@@ -200,6 +200,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     submitFeedback: "Submit",
     feedbackThanks: "Thanks for your feedback!",
     regenerateOption: "Regenerate Plan",
-    regenerateDesc: "Not satisfied? Regenerate based on your feedback above.",
+    regenerateDesc: "We will optimize and regenerate the itinerary based on your feedback.",
   }
 };

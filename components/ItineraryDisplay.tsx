@@ -613,56 +613,46 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
                             />
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 mt-6 w-full max-w-lg">
-                            {/* Submit Review Only */}
+                        {/* Action Button - Just Submit */}
+                         <div className="mt-8 w-full max-w-lg mx-auto">
                             <button 
                                 onClick={handleFeedbackSubmit}
                                 disabled={rating === 0}
-                                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+                                className={`w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 transform ${
                                     rating > 0 
-                                    ? 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 hover:border-slate-300' 
-                                    : 'bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed'
+                                    ? 'bg-slate-900 text-white shadow-xl shadow-slate-200 hover:bg-indigo-600 hover:shadow-indigo-200 hover:-translate-y-1' 
+                                    : 'bg-slate-100 text-slate-300 cursor-not-allowed'
                                 }`}
                             >
                                 <Send className="w-4 h-4" />
                                 {t.submitFeedback}
                             </button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="py-8 animate-fade-in w-full max-w-lg mx-auto">
+                        {/* Success State */}
+                        <div className="flex flex-col items-center mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-100 mb-4 transform hover:scale-110 transition-transform">
+                                <ThumbsUp className="w-8 h-8 fill-white/20" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-800">{t.feedbackThanks}</h3>
+                        </div>
 
-                            {/* Regenerate with Feedback */}
+                        {/* Regenerate Prompt */}
+                        <div className="bg-indigo-50/50 rounded-2xl border border-indigo-100 p-6 flex flex-col items-center text-center">
+                            <p className="text-slate-600 mb-6 leading-relaxed">
+                               {t.regenerateDesc}
+                            </p>
+                            
                             <button 
                                 onClick={() => onRegenerate(feedback)}
-                                className="flex-[1.5] flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg shadow-indigo-200 transition-all duration-200 bg-slate-900 hover:bg-indigo-600 hover:shadow-indigo-300 transform hover:-translate-y-0.5 active:translate-y-0"
+                                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transform hover:-translate-y-1"
                             >
-                                <RefreshCw className="w-4 h-4" />
+                                <RefreshCw className="w-5 h-5" />
                                 {t.regenerateOption}
                             </button>
                         </div>
-                        
-                        <p className="mt-4 text-xs text-slate-400 max-w-xs mx-auto">
-                            {t.regenerateDesc}
-                        </p>
-                    </>
-                ) : (
-                    <div className="py-12 animate-fade-in flex flex-col items-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-green-100 mb-6">
-                            <ThumbsUp className="w-8 h-8" />
-                        </div>
-                        <h3 className="text-2xl font-bold text-slate-800 mb-2">{t.feedbackThanks}</h3>
-                        <p className="text-slate-500 mb-8 max-w-sm">
-                           We appreciate your input! You can still regenerate the plan if you wish to try a different variation.
-                        </p>
-                        
-                        <button 
-                            onClick={() => {
-                                setFeedbackSubmitted(false);
-                                onRegenerate(feedback);
-                            }}
-                            className="flex items-center gap-2 px-8 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
-                        >
-                            <RefreshCw className="w-4 h-4" />
-                            {t.regenerateOption}
-                        </button>
                     </div>
                 )}
             </div>
