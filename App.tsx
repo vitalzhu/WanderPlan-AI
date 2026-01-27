@@ -17,13 +17,19 @@ function App() {
 
   const t = TRANSLATIONS[language];
 
-  const handleFormSubmit = async (prefs: TravelPreferences) => {
-    setLastPrefs(prefs);
+  const handleFormSubmit = async (prefs: TravelPreferences, feedback?: string) => {
+    // Only update lastPrefs if this is a fresh submission (no feedback)
+    // This ensures that when the user goes back to the form, they see their original inputs,
+    // not the "dirty" state mixed with feedback instructions.
+    if (!feedback) {
+        setLastPrefs(prefs);
+    }
+    
     setView('loading');
     setError(null);
     try {
       // Calls the /api/generate endpoint via aiService
-      const result = await generateItinerary(prefs, language);
+      const result = await generateItinerary(prefs, language, feedback);
       setPlan(result);
       setView('result');
     } catch (err: any) {
@@ -36,17 +42,8 @@ function App() {
   const handleRegenerate = (feedback: string) => {
     if (!lastPrefs) return;
     
-    // Create a copy of prefs with updated custom keywords to include feedback
-    const feedbackNote = feedback && feedback.trim() ? ` [Refinement based on feedback: ${feedback}]` : '';
-    
-    const newPrefs = {
-        ...lastPrefs,
-        customKeywords: (lastPrefs.customKeywords || '') + feedbackNote
-    };
-    
-    // Trigger generation with new prefs (this will update lastPrefs when handleFormSubmit is called, 
-    // effectively saving the feedback into the history for this session)
-    handleFormSubmit(newPrefs);
+    // Trigger generation with existing prefs and the explicit feedback
+    handleFormSubmit(lastPrefs, feedback);
   };
 
   const resetApp = () => {
@@ -86,7 +83,7 @@ function App() {
             </div>
             {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center text-sm font-medium">{error}</div>}
             
-            <TravelForm onSubmit={handleFormSubmit} isLoading={false} language={language} initialValues={lastPrefs} key={lastPrefs ? 'editing' : 'new'} />
+            <TravelForm onSubmit={(prefs) => handleFormSubmit(prefs)} isLoading={false} language={language} initialValues={lastPrefs} key={lastPrefs ? 'editing' : 'new'} />
             
             {plan && (
                 <div className="fixed bottom-6 right-6 z-20 animate-fade-in-up">

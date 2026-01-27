@@ -6,17 +6,28 @@ export const config = {
   runtime: 'edge',
 };
 
-const generatePrompt = (prefs, language, provider) => {
+const generatePrompt = (prefs, language, provider, feedback) => {
   const langName = language === 'zh' ? 'Chinese (Simplified)' : 'English';
   const currentDate = new Date().toISOString().split('T')[0];
   const stopovers = prefs.waypoints.length > 0 ? prefs.waypoints.join(', ') : "None";
   const avoidList = prefs.avoid.length > 0 ? prefs.avoid.join(', ') : "None";
-  const isCampingTrip = prefs.styles.includes('Long-distance Camping');
   const isGemini = provider === 'gemini';
+
+  const feedbackInstruction = feedback ? `
+    *** IMPORTANT REGENERATION INSTRUCTION ***
+    The user wants to REGENERATE the itinerary based on the following feedback:
+    "${feedback}"
+    
+    You must ADJUST the itinerary to strictly address this feedback. 
+    If the feedback contradicts the original preferences below, prioritize the feedback.
+    ******************************************
+  ` : "";
 
   return `
     Act as a senior travel planner. Create a ${prefs.days}-day trip to ${prefs.destination} for a ${prefs.companions} trip (${prefs.travelers} people).
     
+    ${feedbackInstruction}
+
     Context:
     - Current Date: ${currentDate}
     - Trip Start Date: ${prefs.startDate}
@@ -125,8 +136,8 @@ export default async function handler(req) {
   }
 
   try {
-    const { prefs, language } = await req.json();
-    const prompt = generatePrompt(prefs, language, prefs.provider);
+    const { prefs, language, feedback } = await req.json();
+    const prompt = generatePrompt(prefs, language, prefs.provider, feedback);
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({

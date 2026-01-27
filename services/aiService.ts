@@ -1,5 +1,4 @@
 
-
 import { TravelPreferences, TravelPlan, Language, SearchSource, TimeBlock, LogisticsBlock, TravelConsiderations, SouvenirsInfo } from "../types";
 
 // Helper to sanitize the response string into a clean JSON object
@@ -84,14 +83,14 @@ const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: S
     return result;
 };
 
-export const generateItinerary = async (prefs: TravelPreferences, language: Language): Promise<TravelPlan> => {
+export const generateItinerary = async (prefs: TravelPreferences, language: Language, feedback?: string): Promise<TravelPlan> => {
   try {
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prefs, language }),
+      body: JSON.stringify({ prefs, language, feedback }),
     });
 
     if (!response.ok) {
