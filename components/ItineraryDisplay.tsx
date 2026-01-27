@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { TravelPlan, Language, TimeBlock, LogisticsBlock, WeatherInfo, TravelConsiderations, SouvenirsInfo } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles, MessageSquare, Send, ThumbsUp, RefreshCw } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles, MessageSquare, Send, ThumbsUp, RefreshCw, Sparkle } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
@@ -564,71 +564,109 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
           </div>
       )}
       
-      {/* Feedback Mechanism */}
-      <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 mt-8 text-center no-print">
-        {!feedbackSubmitted ? (
-            <>
-                <h3 className="text-lg font-bold text-slate-800 mb-2">{t.feedbackTitle}</h3>
-                <p className="text-sm text-slate-500 mb-6">{t.feedbackSubtitle}</p>
-                
-                <div className="flex justify-center gap-2 mb-6">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                        <button 
-                            key={star} 
-                            onClick={() => setRating(star)}
-                            className="p-1 transition-transform hover:scale-110 focus:outline-none"
-                        >
-                            <Star 
-                                className={`w-8 h-8 ${star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} 
-                            />
-                        </button>
-                    ))}
-                </div>
+      {/* Unified Feedback & Regenerate Section */}
+      <div className="mt-12 mb-8 no-print animate-fade-in-up">
+        <div className="relative overflow-hidden bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 p-1">
+            
+            {/* Decorative background gradients */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
-                <div className="relative max-w-md mx-auto">
-                    <textarea
-                        value={feedback}
-                        onChange={(e) => setFeedback(e.target.value)}
-                        placeholder={t.feedbackPlaceholder}
-                        className="w-full bg-white border border-slate-200 rounded-xl p-4 pr-12 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-24"
-                    />
-                    <button 
-                        onClick={handleFeedbackSubmit}
-                        disabled={rating === 0}
-                        title={t.submitFeedback}
-                        className={`absolute bottom-3 right-3 p-2 rounded-lg transition-colors ${rating > 0 ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
-                    >
-                        <Send className="w-4 h-4" />
-                    </button>
-                </div>
+            <div className="relative z-10 p-6 sm:p-8 flex flex-col items-center text-center">
                 
-                <div className="mt-6 pt-6 border-t border-slate-200/60 w-full max-w-md mx-auto flex flex-col items-center gap-3">
-                     <button 
-                        onClick={() => onRegenerate(feedback)}
-                        className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                        {t.regenerateOption}
-                    </button>
-                    <p className="text-xs text-slate-400">{t.regenerateDesc}</p>
-                </div>
-            </>
-        ) : (
-            <div className="py-8 animate-fade-in">
-                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <ThumbsUp className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-800">{t.feedbackThanks}</h3>
-                
-                <button 
-                    onClick={() => onRegenerate(feedback)}
-                    className="mt-6 flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm mx-auto"
-                >
-                    <RefreshCw className="w-4 h-4" />
-                    {t.regenerateOption}
-                </button>
+                {!feedbackSubmitted ? (
+                    <>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">{t.feedbackTitle}</h3>
+                        <p className="text-slate-500 text-sm mb-6 max-w-md mx-auto leading-relaxed">
+                            {t.feedbackSubtitle}
+                        </p>
+
+                        {/* Stars */}
+                        <div className="flex gap-3 mb-8">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button 
+                                    key={star} 
+                                    onClick={() => setRating(star)}
+                                    className="group focus:outline-none transition-all duration-200 hover:scale-110"
+                                >
+                                    <Star 
+                                        className={`w-8 h-8 transition-colors duration-200 ${
+                                            star <= rating 
+                                            ? 'fill-amber-400 text-amber-400 drop-shadow-sm' 
+                                            : 'text-slate-200 group-hover:text-slate-300'
+                                        }`} 
+                                        strokeWidth={star <= rating ? 0 : 1.5}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="w-full max-w-lg relative group">
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                            <textarea
+                                value={feedback}
+                                onChange={(e) => setFeedback(e.target.value)}
+                                placeholder={t.feedbackPlaceholder}
+                                className="relative w-full bg-white border border-slate-200 rounded-2xl p-4 text-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none resize-none h-32 transition-all text-sm leading-relaxed"
+                            />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 mt-6 w-full max-w-lg">
+                            {/* Submit Review Only */}
+                            <button 
+                                onClick={handleFeedbackSubmit}
+                                disabled={rating === 0}
+                                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+                                    rating > 0 
+                                    ? 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 hover:border-slate-300' 
+                                    : 'bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed'
+                                }`}
+                            >
+                                <Send className="w-4 h-4" />
+                                {t.submitFeedback}
+                            </button>
+
+                            {/* Regenerate with Feedback */}
+                            <button 
+                                onClick={() => onRegenerate(feedback)}
+                                className="flex-[1.5] flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg shadow-indigo-200 transition-all duration-200 bg-slate-900 hover:bg-indigo-600 hover:shadow-indigo-300 transform hover:-translate-y-0.5 active:translate-y-0"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                {t.regenerateOption}
+                            </button>
+                        </div>
+                        
+                        <p className="mt-4 text-xs text-slate-400 max-w-xs mx-auto">
+                            {t.regenerateDesc}
+                        </p>
+                    </>
+                ) : (
+                    <div className="py-12 animate-fade-in flex flex-col items-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-green-100 mb-6">
+                            <ThumbsUp className="w-8 h-8" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-800 mb-2">{t.feedbackThanks}</h3>
+                        <p className="text-slate-500 mb-8 max-w-sm">
+                           We appreciate your input! You can still regenerate the plan if you wish to try a different variation.
+                        </p>
+                        
+                        <button 
+                            onClick={() => {
+                                setFeedbackSubmitted(false);
+                                onRegenerate(feedback);
+                            }}
+                            className="flex items-center gap-2 px-8 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            {t.regenerateOption}
+                        </button>
+                    </div>
+                )}
             </div>
-        )}
+        </div>
       </div>
 
       {/* Action Bar */}
