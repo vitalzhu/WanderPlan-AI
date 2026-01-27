@@ -2,16 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { TravelPlan, Language, TimeBlock, LogisticsBlock, WeatherInfo, TravelConsiderations, SouvenirsInfo } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles, MessageSquare, Send, ThumbsUp } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles, MessageSquare, Send, ThumbsUp, RefreshCw } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
   onReset: () => void;
   onBack: () => void;
+  onRegenerate: (feedback: string) => void;
   language: Language;
 }
 
-export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initialPlan, onReset, onBack, language }) => {
+export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initialPlan, onReset, onBack, onRegenerate, language }) => {
   const [expandedDay, setExpandedDay] = useState<number | 'ALL' | null>(1);
   const [plan, setPlan] = useState<TravelPlan>(initialPlan);
   const [isEditing, setIsEditing] = useState(false);
@@ -594,10 +595,22 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
                     <button 
                         onClick={handleFeedbackSubmit}
                         disabled={rating === 0}
+                        title={t.submitFeedback}
                         className={`absolute bottom-3 right-3 p-2 rounded-lg transition-colors ${rating > 0 ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
                     >
                         <Send className="w-4 h-4" />
                     </button>
+                </div>
+                
+                <div className="mt-6 pt-6 border-t border-slate-200/60 w-full max-w-md mx-auto flex flex-col items-center gap-3">
+                     <button 
+                        onClick={() => onRegenerate(feedback)}
+                        className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                        {t.regenerateOption}
+                    </button>
+                    <p className="text-xs text-slate-400">{t.regenerateDesc}</p>
                 </div>
             </>
         ) : (
@@ -606,6 +619,14 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
                     <ThumbsUp className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-800">{t.feedbackThanks}</h3>
+                
+                <button 
+                    onClick={() => onRegenerate(feedback)}
+                    className="mt-6 flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm mx-auto"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                    {t.regenerateOption}
+                </button>
             </div>
         )}
       </div>

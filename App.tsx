@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { TravelForm } from './components/TravelForm';
 import { ItineraryDisplay } from './components/ItineraryDisplay';
@@ -30,6 +31,22 @@ function App() {
       setError(`${t.errorGen} (${err.message || 'Unknown Error'})`);
       setView('form');
     }
+  };
+
+  const handleRegenerate = (feedback: string) => {
+    if (!lastPrefs) return;
+    
+    // Create a copy of prefs with updated custom keywords to include feedback
+    const feedbackNote = feedback && feedback.trim() ? ` [Refinement based on feedback: ${feedback}]` : '';
+    
+    const newPrefs = {
+        ...lastPrefs,
+        customKeywords: (lastPrefs.customKeywords || '') + feedbackNote
+    };
+    
+    // Trigger generation with new prefs (this will update lastPrefs when handleFormSubmit is called, 
+    // effectively saving the feedback into the history for this session)
+    handleFormSubmit(newPrefs);
   };
 
   const resetApp = () => {
@@ -81,7 +98,7 @@ function App() {
           </>
         )}
         {view === 'loading' && <LoadingState language={language} />}
-        {view === 'result' && plan && <ItineraryDisplay plan={plan} onReset={resetApp} onBack={backToForm} language={language} />}
+        {view === 'result' && plan && <ItineraryDisplay plan={plan} onReset={resetApp} onBack={backToForm} onRegenerate={handleRegenerate} language={language} />}
       </main>
       <footer className="border-t border-slate-200 mt-auto py-8 text-center text-slate-500 text-sm">
         <p>&copy; {new Date().getFullYear()} {t.footer}</p>

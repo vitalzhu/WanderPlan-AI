@@ -93,12 +93,14 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     specialties: "推荐特产",
     bestWishes: "旅途寄语",
 
-    // Feedback
+    // Feedback & Regenerate
     feedbackTitle: "评价生成结果",
     feedbackSubtitle: "您的反馈将帮助我们改进 AI 模型",
     feedbackPlaceholder: "有什么建议或反馈吗？",
-    submitFeedback: "提交",
+    submitFeedback: "提交评价",
     feedbackThanks: "感谢您的反馈！",
+    regenerateOption: "重新生成行程",
+    regenerateDesc: "对结果不满意？基于上方反馈重新生成。",
   },
   en: {
     appTitle: "WanderPlan AI",
@@ -191,11 +193,13 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     specialties: "Local Specialties",
     bestWishes: "Best Wishes",
 
-    // Feedback
+    // Feedback & Regenerate
     feedbackTitle: "Rate this Plan",
     feedbackSubtitle: "Your feedback helps us improve the AI",
     feedbackPlaceholder: "Any suggestions for improvement?",
     submitFeedback: "Submit",
     feedbackThanks: "Thanks for your feedback!",
+    regenerateOption: "Regenerate Plan",
+    regenerateDesc: "Not satisfied? Regenerate based on your feedback above.",
   }
 };
