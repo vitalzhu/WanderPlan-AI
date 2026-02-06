@@ -14,22 +14,23 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>('zh');
   const [lastPrefs, setLastPrefs] = useState<TravelPreferences | null>(null);
+  const [loadingMsg, setLoadingMsg] = useState<string>('');
 
   const t = TRANSLATIONS[language];
 
   const handleFormSubmit = async (prefs: TravelPreferences, feedback?: string) => {
-    // Only update lastPrefs if this is a fresh submission (no feedback)
-    // This ensures that when the user goes back to the form, they see their original inputs,
-    // not the "dirty" state mixed with feedback instructions.
     if (!feedback) {
         setLastPrefs(prefs);
     }
     
     setView('loading');
+    setLoadingMsg('');
     setError(null);
     try {
-      // Calls the /api/generate endpoint via aiService
-      const result = await generateItinerary(prefs, language, feedback);
+      // Pass the progress callback
+      const result = await generateItinerary(prefs, language, feedback, (msg) => {
+          setLoadingMsg(msg);
+      });
       setPlan(result);
       setView('result');
     } catch (err: any) {
@@ -41,8 +42,6 @@ function App() {
 
   const handleRegenerate = (feedback: string) => {
     if (!lastPrefs) return;
-    
-    // Trigger generation with existing prefs and the explicit feedback
     handleFormSubmit(lastPrefs, feedback);
   };
 
@@ -51,6 +50,7 @@ function App() {
     setLastPrefs(null);
     setView('form');
     setError(null);
+    setLoadingMsg('');
   };
 
   const backToForm = () => setView('form');
@@ -94,7 +94,7 @@ function App() {
             )}
           </>
         )}
-        {view === 'loading' && <LoadingState language={language} />}
+        {view === 'loading' && <LoadingState language={language} progressMessage={loadingMsg} />}
         {view === 'result' && plan && <ItineraryDisplay plan={plan} onReset={resetApp} onBack={backToForm} onRegenerate={handleRegenerate} language={language} />}
       </main>
       <footer className="border-t border-slate-200 mt-auto py-8 text-center text-slate-500 text-sm">

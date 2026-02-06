@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
-import { TravelPreferences, Language, AIProvider } from '../types';
+import { TravelPreferences, Language } from '../types';
 import { TRAVEL_STYLES, PACE_OPTIONS, COMPANION_OPTIONS, BUDGET_OPTIONS, TRANSPORT_OPTIONS, AVOID_OPTIONS } from '../constants';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Sparkles, AlertCircle, Plus, Trash2, Ban, Cpu, Search, Zap } from 'lucide-react';
+import { MapPin, Sparkles, AlertCircle, Plus, Trash2, Ban } from 'lucide-react';
 
 interface TravelFormProps {
   onSubmit: (prefs: TravelPreferences) => void;
@@ -18,7 +19,6 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
   const [endDate, setEndDate] = useState(initialValues?.endDate || '');
   const [travelers, setTravelers] = useState<number>(initialValues?.travelers || 2);
   const [styles, setStyles] = useState<string[]>(initialValues?.styles || []);
-  const [provider, setProvider] = useState<AIProvider>(initialValues?.provider || 'gemini');
   
   const [avoid, setAvoid] = useState<string[]>(() => {
     const knownIds = new Set(AVOID_OPTIONS.map(o => o.id));
@@ -99,8 +99,7 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
       transportation,
       companions,
       budget,
-      customKeywords,
-      provider
+      customKeywords
     });
   };
 
@@ -224,57 +223,8 @@ export const TravelForm: React.FC<TravelFormProps> = ({ onSubmit, isLoading, lan
         <textarea value={customKeywords} onChange={e => setCustomKeywords(e.target.value)} disabled={isLoading} placeholder={t.wishesPlaceholder} className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none" />
       </div>
       
-      {/* Optimized Provider Selector (Moved to Bottom) */}
+      {/* Submit Button */}
       <div className="pt-2">
-         <div className="flex items-center justify-between mb-3 px-1">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5" /> {t.providerLabel}
-            </label>
-         </div>
-         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <button
-                type="button"
-                onClick={() => setProvider('gemini')}
-                className={`group relative flex flex-row items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
-                    provider === 'gemini' 
-                    ? 'bg-white border-indigo-600 shadow-lg shadow-indigo-50 ring-0' 
-                    : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
-                }`}
-            >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${provider === 'gemini' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
-                    <Search className="w-5 h-5" />
-                </div>
-                <div className="w-full">
-                    <div className="flex justify-between items-center w-full">
-                        <span className={`text-sm font-bold ${provider === 'gemini' ? 'text-indigo-900' : 'text-slate-700'}`}>Google Gemini</span>
-                        {provider === 'gemini' && <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>}
-                    </div>
-                    <span className="text-xs text-slate-500 mt-0.5 block">Multimodal + Search</span>
-                </div>
-            </button>
-
-            <button
-                type="button"
-                onClick={() => setProvider('siliconflow')}
-                className={`group relative flex flex-row items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
-                    provider === 'siliconflow' 
-                    ? 'bg-white border-purple-600 shadow-lg shadow-purple-50 ring-0' 
-                    : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
-                }`}
-            >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${provider === 'siliconflow' ? 'bg-purple-100 text-purple-600' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
-                    <Zap className="w-5 h-5" />
-                </div>
-                 <div className="w-full">
-                    <div className="flex justify-between items-center w-full">
-                        <span className={`text-sm font-bold ${provider === 'siliconflow' ? 'text-purple-900' : 'text-slate-700'}`}>SiliconFlow</span>
-                        {provider === 'siliconflow' && <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse"></span>}
-                    </div>
-                    <span className="text-xs text-slate-500 mt-0.5 block">DeepSeek V3</span>
-                </div>
-            </button>
-         </div>
-
          {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm mb-4 border border-red-100"><AlertCircle className="w-5 h-5 flex-shrink-0"/>{error}</div>}
 
          <button type="submit" disabled={isLoading} className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 ${isLoading ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-indigo-200'}`}>

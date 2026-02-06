@@ -1,17 +1,16 @@
 
-import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
+import { SILICONFLOW_API_KEY, SILICONFLOW_BASE_URL, SILICONFLOW_MODEL } from './config.js';
 
 export const config = {
   runtime: 'edge',
 };
 
-const generatePrompt = (prefs, language, provider, feedback) => {
+const generatePrompt = (prefs, language, feedback) => {
   const langName = language === 'zh' ? 'Chinese (Simplified)' : 'English';
   const currentDate = new Date().toISOString().split('T')[0];
   const stopovers = prefs.waypoints.length > 0 ? prefs.waypoints.join(', ') : "None";
   const avoidList = prefs.avoid.length > 0 ? prefs.avoid.join(', ') : "None";
-  const isGemini = provider === 'gemini';
 
   const feedbackInstruction = feedback ? `
     *** IMPORTANT REGENERATION INSTRUCTION ***
@@ -55,14 +54,14 @@ const generatePrompt = (prefs, language, provider, feedback) => {
 
     CRITICAL TASKS:
     1. **Route Planning**: Organize the route logically to minimize backtracking and include all stopovers (${stopovers}).
-    2. **Weather Search**: ${isGemini ? `Use Google Search to find the specific weather forecast (if close to ${currentDate}) or historical weather averages for ${prefs.destination} during ${prefs.startDate} to ${prefs.endDate}.` : "Estimate historical weather for the dates."}
+    2. **Weather**: Estimate historical weather averages for ${prefs.destination} during ${prefs.startDate} to ${prefs.endDate}.
        - Based on the weather, provide specific temperature ranges and clothing/footwear advice.
     3. **Travel Info Search**: Find requirements for documents (ID/Visa/Permits), local customs/taboos, health risks (like altitude), laws, and famous local souvenirs for ${prefs.destination}.
 
     Structure per Day:
     1. **Morning/Afternoon/Evening**:
        - 'title': The main location or activity name (e.g. "Zhaosu Wetland Park").
-       - 'content': A detailed, immersive narrative paragraph (approx 80-120 words). Describe the atmosphere, specific sights, sounds, and emotions. Explain exactly what to do and how to enjoy the moment. Avoid generic summaries.
+       - 'content': A detailed, immersive narrative paragraph (approx 60-80 words). Describe the atmosphere, specific sights, sounds, and emotions. Explain exactly what to do and how to enjoy the moment. Avoid generic summaries.
        - 'tips': "Warm Tips" (温馨提示) - Specific advice about weather, best photo times, ice conditions, or booking requirements. Return empty string if no specific tip.
     2. **Logistics**:
        - 'driving': Km and time (e.g. "270KM, approx 4h").
@@ -137,89 +136,42 @@ export default async function handler(req) {
 
   try {
     const { prefs, language, feedback } = await req.json();
-    const prompt = generatePrompt(prefs, language, prefs.provider, feedback);
+    const prompt = generatePrompt(prefs, language, feedback);
     const encoder = new TextEncoder();
+
+    if (!SILICONFLOW_API_KEY) throw new Error("Server Error: Missing SiliconFlow API Key");
+
+    const openai = new OpenAI({
+      apiKey: SILICONFLOW_API_KEY,
+      baseURL: SILICONFLOW_BASE_URL
+    });
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // --- GEMINI HANDLER ---
-          if (prefs.provider === 'gemini') {
-            const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
-            if (!apiKey) throw new Error("Server Error: Missing Google API Key");
+          const completion = await openai.chat.completions.create({
+            model: SILICONFLOW_MODEL, 
+            messages: [
+              { role: "system", content: "You are a world-class travel agent AI. Always return valid JSON." },
+              { role: "user", content: prompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.7,
+            stream: true, 
+          });
 
-            const ai = new GoogleGenAI({ apiKey });
-            
-            // Use stream to prevent timeout
-            const response = await ai.models.generateContentStream({
-              model: "gemini-3-flash-preview",
-              contents: prompt,
-              config: {
-                tools: [{ googleSearch: {} }],
-                systemInstruction: "You are a world-class travel agent AI. Return valid JSON.",
-                responseMimeType: "application/json"
-              }
-            });
-
-            let gatheredSources = [];
-            
-            for await (const chunk of response.stream) {
-              const text = chunk.text();
-              if (text) {
-                controller.enqueue(encoder.encode(text));
-              }
-              // Collect grounding metadata
-              if (chunk.groundingMetadata?.groundingChunks) {
-                 chunk.groundingMetadata.groundingChunks.forEach(c => {
-                   if (c.web?.uri && c.web?.title) {
-                     gatheredSources.push({ title: c.web.title, url: c.web.uri });
-                   }
-                 });
-              }
+          for await (const chunk of completion) {
+            const text = chunk.choices[0]?.delta?.content || "";
+            if (text) {
+              controller.enqueue(encoder.encode(text));
             }
-            
-            // Append sources at the very end using a custom delimiter
-            controller.enqueue(encoder.encode(`\n\n__SOURCES__:${JSON.stringify(gatheredSources)}`));
-          
-          } 
-          // --- SILICONFLOW HANDLER ---
-          else if (prefs.provider === 'siliconflow') {
-            const apiKey = process.env.SILICONFLOW_API_KEY;
-            if (!apiKey) throw new Error("Server Error: Missing SiliconFlow API Key");
-
-            const openai = new OpenAI({
-              apiKey: apiKey,
-              baseURL: "https://api.siliconflow.cn/v1" 
-            });
-
-            const completion = await openai.chat.completions.create({
-              model: "deepseek-ai/DeepSeek-V3", 
-              messages: [
-                { role: "system", content: "You are a world-class travel agent AI. Always return valid JSON." },
-                { role: "user", content: prompt }
-              ],
-              response_format: { type: "json_object" },
-              temperature: 0.7,
-              stream: true, // Enable streaming
-            });
-
-            for await (const chunk of completion) {
-              const text = chunk.choices[0]?.delta?.content || "";
-              if (text) {
-                controller.enqueue(encoder.encode(text));
-              }
-            }
-            // Append empty sources for consistency
-            controller.enqueue(encoder.encode(`\n\n__SOURCES__:[]`));
-          } else {
-             throw new Error("Invalid Provider");
           }
-
+          
+          // Append empty sources since DeepSeek doesn't support grounding metadata in this flow
+          controller.enqueue(encoder.encode(`\n\n__SOURCES__:[]`));
+          
           controller.close();
         } catch (err) {
-          // If error occurs during stream, we can't easily change status code, 
-          // but we can send an error message in body if needed.
-          // For now, we just close with error to abort stream.
           console.error("Stream Error:", err);
           controller.error(err);
         }

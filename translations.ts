@@ -62,7 +62,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     weatherCondition: "天气状况",
     humidity: "湿度",
     clothing: "穿衣建议",
-    sources: "信息来源 (Google Search)",
+    sources: "信息来源",
     edit: "编辑行程",
     save: "保存修改",
     cancel: "取消",
@@ -70,9 +70,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     backToSearch: "调整需求",
     returnToPlan: "返回当前行程",
     customAvoidPlaceholder: "其他需要避开的事物（例如：海鲜、高海拔...）",
-    providerLabel: "模型服务商",
-    geminiLabel: "Google Gemini (推荐/含搜索)",
-    siliconFlowLabel: "硅基流动 (DeepSeek/Qwen)",
     
     // New Narrative Fields
     dailyTheme: "今日主题",
@@ -162,7 +159,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     weatherCondition: "Condition",
     humidity: "Humidity",
     clothing: "Clothing Advice",
-    sources: "Sources (Google Search)",
+    sources: "Sources",
     edit: "Edit Plan",
     save: "Save Changes",
     cancel: "Cancel",
@@ -170,9 +167,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     backToSearch: "Edit Preferences",
     returnToPlan: "Back to Itinerary",
     customAvoidPlaceholder: "Other things to avoid (e.g. Seafood, High altitude...)",
-    providerLabel: "AI Provider",
-    geminiLabel: "Google Gemini (Recommended)",
-    siliconFlowLabel: "SiliconFlow (DeepSeek/Qwen)",
     
     // New Narrative Fields
     dailyTheme: "Theme",

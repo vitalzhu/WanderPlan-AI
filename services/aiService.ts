@@ -83,7 +83,32 @@ const processJsonResponse = (rawJson: any, prefs: TravelPreferences, sources?: S
     return result;
 };
 
-export const generateItinerary = async (prefs: TravelPreferences, language: Language, feedback?: string): Promise<TravelPlan> => {
+// Progress detection helper
+const detectProgress = (text: string, language: Language): string | null => {
+    // Check for Day markers in the raw JSON string
+    const dayMatch = text.match(/"day"\s*:\s*(\d+)/g);
+    if (dayMatch) {
+        // Get the last matched day
+        const lastDay = dayMatch[dayMatch.length - 1].match(/\d+/);
+        if (lastDay) {
+            return language === 'zh' ? `正在规划第 ${lastDay[0]} 天...` : `Planning Day ${lastDay[0]}...`;
+        }
+    }
+    
+    // Check for section markers
+    if (text.includes('"souvenirs"')) return language === 'zh' ? "正在整理特产清单..." : "Finalizing souvenirs...";
+    if (text.includes('"considerations"')) return language === 'zh' ? "正在查询注意事项..." : "Checking travel tips...";
+    if (text.includes('"weather_info"')) return language === 'zh' ? "正在分析天气..." : "Analyzing weather...";
+    
+    return null;
+};
+
+export const generateItinerary = async (
+    prefs: TravelPreferences, 
+    language: Language, 
+    feedback?: string,
+    onProgress?: (msg: string) => void
+): Promise<TravelPlan> => {
   try {
     const response = await fetch('/api/generate', {
       method: 'POST',
@@ -106,11 +131,23 @@ export const generateItinerary = async (prefs: TravelPreferences, language: Lang
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let fullText = '';
+    let lastProgressMsg = '';
     
     while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        fullText += decoder.decode(value, { stream: true });
+        
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        
+        // Try to update progress based on content
+        if (onProgress) {
+            const msg = detectProgress(fullText, language);
+            if (msg && msg !== lastProgressMsg) {
+                lastProgressMsg = msg;
+                onProgress(msg);
+            }
+        }
     }
     
     // Split the sources from the JSON text
