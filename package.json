@@ -1,3 +1,4 @@
+
 {
   "name": "wanderplan-ai",
   "version": "1.0.0",
@@ -9,6 +10,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.35.0",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.562.0",
     "openai": "^4.28.0",
     "react": "^19.2.3",

@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TravelPlan, Language, TimeBlock, LogisticsBlock, WeatherInfo, TravelConsiderations, SouvenirsInfo } from '../types';
 import { TRANSLATIONS } from '../translations';
-import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles, MessageSquare, Send, ThumbsUp, RefreshCw, Sparkle } from 'lucide-react';
+import { MapPin, Clock, Users, CalendarDays, ChevronDown, ChevronUp, AlertCircle, Copy, Check, Bus, BedDouble, Info, FileText, Printer, Thermometer, Shirt, ExternalLink, Edit2, Save, X, ArrowLeft, CloudSun, Droplets, Target, Lightbulb, Ticket, Backpack, Moon, Sun, Utensils, Car, Star, Navigation, Shield, Gavel, Gift, Heart, FileWarning, Sparkles, MessageSquare, Send, ThumbsUp, RefreshCw, ImageDown, Loader2 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 interface ItineraryDisplayProps {
   plan: TravelPlan;
@@ -18,7 +19,11 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
   const [isEditing, setIsEditing] = useState(false);
   const [editedPlan, setEditedPlan] = useState<TravelPlan>(initialPlan);
   const [copied, setCopied] = useState(false);
+  const [isExportingImage, setIsExportingImage] = useState(false);
   
+  // Ref for the content we want to capture
+  const contentRef = useRef<HTMLDivElement>(null);
+
   // Feedback State
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -56,7 +61,6 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
   };
 
   const handleFeedbackSubmit = () => {
-      // In a real app, send to backend here
       console.log('Feedback submitted:', { rating, feedback });
       setFeedbackSubmitted(true);
   };
@@ -122,10 +126,49 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `WanderPlan_Itinerary.txt`;
+    link.download = `WanderPlan_${currentPlan.overview.cities[0] || 'Itinerary'}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleSaveImage = async () => {
+    if (!contentRef.current || isExportingImage) return;
+
+    try {
+        setIsExportingImage(true);
+        // Store current expanded state
+        const prevExpanded = expandedDay;
+        // Expand all for the screenshot
+        setExpandedDay('ALL');
+
+        // Allow time for DOM to update and expansion animations to finish
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        const canvas = await html2canvas(contentRef.current, {
+            scale: 2, // High resolution
+            useCORS: true, // For images
+            backgroundColor: '#ffffff', // Ensure white background
+            logging: false,
+            // Optimization to prevent capturing way too much vertically if there are issues
+            windowHeight: contentRef.current.scrollHeight
+        });
+
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = `WanderPlan_${currentPlan.overview.cities[0] || 'Trip'}.png`;
+        link.click();
+
+        // Restore state
+        setExpandedDay(prevExpanded);
+
+    } catch (err) {
+        console.error("Image generation failed", err);
+        alert(t.errorGen || "Export failed");
+    } finally {
+        setIsExportingImage(false);
+    }
   };
 
   const handlePrint = () => {
@@ -144,9 +187,9 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
       title, 
       data, 
       icon: Icon, 
-      colorClass, // text-amber-500
-      bgClass,    // bg-amber-50
-      ringClass,  // ring-amber-100
+      colorClass, 
+      bgClass,    
+      ringClass,  
       dayIndex, 
       section,
       isLast
@@ -224,8 +267,11 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-24 font-sans">
+    <div className="max-w-3xl mx-auto pb-24 font-sans relative">
       
+      {/* Printable Area Wrapper */}
+      <div ref={contentRef} className="space-y-6 bg-slate-50 p-2 sm:p-0">
+
       {/* Overview Card */}
       <div className="group relative bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-white overflow-hidden no-print ring-1 ring-slate-100">
         <div className="relative overflow-hidden bg-slate-900 text-white p-8 sm:p-10">
@@ -235,11 +281,11 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
             
             <div className="relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-8">
-                    <button onClick={onBack} className="group flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-wider">
+                    <button onClick={onBack} data-html2canvas-ignore className="group flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-wider">
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         {t.backToSearch}
                     </button>
-                    <button onClick={onReset} className="text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-all backdrop-blur-md border border-white/5">
+                    <button onClick={onReset} data-html2canvas-ignore className="text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-all backdrop-blur-md border border-white/5">
                         {t.newTrip}
                     </button>
                 </div>
@@ -263,8 +309,8 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
             </div>
         </div>
         
-        {/* Action Bar inside Overview */}
-        <div className="bg-white px-6 py-3 flex justify-end border-t border-slate-100">
+        {/* Action Bar inside Overview - Hide when capturing */}
+        <div className="bg-white px-6 py-3 flex justify-end border-t border-slate-100" data-html2canvas-ignore>
              <div className="flex items-center gap-2">
                  {!isEditing ? (
                      <button onClick={handleEditToggle} className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-full text-xs font-bold transition-colors uppercase tracking-wide">
@@ -564,7 +610,12 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
           </div>
       )}
       
-      {/* Unified Feedback & Regenerate Section */}
+      {/* End of contentRef div */}
+      </div>
+      
+      {/* Unified Feedback & Regenerate Section (Outside of contentRef to avoid printing?) No, usually we want feedback hidden but content printed. Let's keep Feedback outside the ref if we want a clean itinerary image. */}
+      {/* Wait, the user usually just wants the plan. Let's keep Feedback OUTSIDE the ref. */}
+      
       <div className="mt-12 mb-8 no-print animate-fade-in-up">
         <div className="relative overflow-hidden bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 p-1">
             
@@ -663,6 +714,15 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
       {!isEditing && (
         <div className="fixed bottom-6 right-6 z-10 flex flex-col items-end gap-3 no-print">
             <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-xl shadow-slate-200/50 border border-white/50 ring-1 ring-slate-200">
+                <button 
+                  onClick={handleSaveImage} 
+                  title={t.exportImage} 
+                  disabled={isExportingImage}
+                  className="p-3 rounded-full hover:bg-slate-100 text-slate-600 transition-colors disabled:opacity-50"
+                >
+                    {isExportingImage ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageDown className="w-5 h-5" />}
+                </button>
+                <div className="w-px h-6 bg-slate-200"></div>
                 <button onClick={handlePrint} title={t.exportPDF} className="p-3 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"><Printer className="w-5 h-5" /></button>
                 <div className="w-px h-6 bg-slate-200"></div>
                 <button onClick={handleExportText} title={t.exportText} className="p-3 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"><FileText className="w-5 h-5" /></button>
