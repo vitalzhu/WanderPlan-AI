@@ -141,15 +141,19 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
         const prevExpanded = expandedDay;
         // Expand all for the screenshot
         setExpandedDay('ALL');
+        
+        // Scroll to top to ensure clean capture without viewport offsets
+        window.scrollTo(0, 0);
 
         // Allow time for DOM to update and expansion animations to finish
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         const canvas = await html2canvas(contentRef.current, {
             scale: 2, // High resolution
             useCORS: true, // For images
-            backgroundColor: '#ffffff', // Ensure white background
+            backgroundColor: '#f8fafc', // Ensure background matches app (slate-50)
             logging: false,
+            scrollY: 0, // Fix vertical text misalignment caused by scrolling
             // Optimization to prevent capturing way too much vertically if there are issues
             windowHeight: contentRef.current.scrollHeight
         });
@@ -275,9 +279,13 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
       {/* Overview Card */}
       <div className="group relative bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-white overflow-hidden no-print ring-1 ring-slate-100">
         <div className="relative overflow-hidden bg-slate-900 text-white p-8 sm:p-10">
-            {/* Ambient Backgrounds */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-fuchsia-600 rounded-full mix-blend-screen filter blur-[80px] opacity-20 translate-y-1/3 -translate-x-1/4"></div>
+            {/* Ambient Backgrounds - Hidden during export to prevent html2canvas artifacts with mix-blend-mode */}
+            {!isExportingImage && (
+                <>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 -translate-y-1/2 translate-x-1/3"></div>
+                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-fuchsia-600 rounded-full mix-blend-screen filter blur-[80px] opacity-20 translate-y-1/3 -translate-x-1/4"></div>
+                </>
+            )}
             
             <div className="relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-8">
@@ -296,7 +304,8 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan: initia
                              <span key={i} className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 bg-white/10 text-indigo-100 rounded border border-white/10 backdrop-blur-sm">{tag}</span>
                         ))}
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-6 leading-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-300 pb-2">
+                    {/* Switch to solid color during export because html2canvas struggles with bg-clip-text */}
+                    <h1 className={`text-3xl sm:text-4xl font-black tracking-tight mb-6 leading-tight pb-2 ${isExportingImage ? 'text-white' : 'text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-300'}`}>
                         {currentPlan.overview.trip_theme}
                     </h1>
                     
