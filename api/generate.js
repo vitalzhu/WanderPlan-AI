@@ -50,22 +50,27 @@ const generatePrompt = (prefs, language, feedback) => {
     - Write in a **Travel Blog / Narrative** style (like a Xiaohongshu/Instagram guide).
     - Do NOT use bullet points for the main content. Use continuous, engaging sentences to describe the experience, emotions, and scenery.
     - Focus on **sensory details**: what to see, hear, smell, and feel.
-    - Example: "The morning light hits the golden peaks... You can feel the cool breeze..."
 
     CRITICAL TASKS:
     1. **Route Planning**: Organize the route logically to minimize backtracking and include all stopovers (${stopovers}).
-    2. **Weather**: Estimate historical weather averages for ${prefs.destination} during ${prefs.startDate} to ${prefs.endDate}.
-       - Based on the weather, provide specific temperature ranges and clothing/footwear advice.
-    3. **Travel Info Search**: Find requirements for documents (ID/Visa/Permits), local customs/taboos, health risks (like altitude), laws, and famous local souvenirs for ${prefs.destination}.
+    2. **Logistical Continuity**: For every day (except Day 1), you MUST explicitly state the travel logic from the *Previous Day's* location to *Today's* location.
+    3. **Weather**: Estimate historical weather averages for ${prefs.destination} during ${prefs.startDate} to ${prefs.endDate}.
+    4. **Travel Info Search**: Find requirements for documents, customs, health, laws, and souvenirs.
 
     Structure per Day:
-    1. **Morning/Afternoon/Evening**:
-       - 'title': The main location or activity name (e.g. "Zhaosu Wetland Park").
-       - 'content': A detailed, immersive narrative paragraph (approx 60-80 words). Describe the atmosphere, specific sights, sounds, and emotions. Explain exactly what to do and how to enjoy the moment. Avoid generic summaries.
-       - 'tips': "Warm Tips" (温馨提示) - Specific advice about weather, best photo times, ice conditions, or booking requirements. Return empty string if no specific tip.
-    2. **Logistics**:
+    1. **Morning**:
+       - 'title': The main location or activity name.
+       - 'content': **MANDATORY TRANSIT BRIDGE**: You MUST start the text by connecting from the previous location. 
+         Format requirement: "Today we depart from [Previous Day's Location] to [Today's Destination], covering approx [X] km ([Y] hours). We recommend starting at [Time, e.g. 8:00 AM] to arrive by [Time] for [Lunch/Local Feature]."
+         AFTER this sentence, continue with the immersive narrative of the destination and morning activity (total 80-100 words).
+       - 'tips': "Warm Tips" (温馨提示).
+    2. **Afternoon/Evening**:
+       - 'title': The main location or activity name.
+       - 'content': A detailed, immersive narrative paragraph (approx 60-80 words). Describe the atmosphere, specific sights, sounds, and emotions.
+       - 'tips': Specific advice.
+    3. **Logistics**:
        - 'driving': Km and time (e.g. "270KM, approx 4h").
-       - 'dining': Breakfast/Lunch/Dinner arrangement (e.g. "Hotel breakfast, Roadside local food for lunch").
+       - 'dining': Breakfast/Lunch/Dinner arrangement.
        - 'accommodation': Specific hotel name or area suggestion.
 
     OUTPUT FORMAT:
